@@ -72,6 +72,13 @@ h2.pg{font-size:1.45rem;margin:0 0 4px;font-weight:700}
 .bk{display:flex;flex-direction:column;gap:6px;align-items:stretch}
 .bk .btn{font-size:.85rem;text-align:center;cursor:pointer}
 @media (max-width:960px){.bk{flex-direction:row;flex-wrap:wrap}}
+.lv{display:inline-block;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-bg);border:1px solid var(--warn);border-radius:5px;padding:0 5px;line-height:16px}
+.ic{display:inline-block;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent);border-radius:5px;padding:0 5px;line-height:16px}
+.icb{width:100%;margin-top:3px;border:1px dashed var(--line);background:var(--surface);border-radius:6px;font-size:12px;padding:2px 0;color:var(--muted)}
+.icb.on{background:var(--accent);border:1px solid var(--accent);color:var(--accent-ink);font-weight:700}
+.lvb{width:100%;margin-top:3px;border:1px dashed var(--line);background:var(--surface);border-radius:6px;font-size:12px;padding:2px 0;color:var(--muted)}
+.lvb.on{background:var(--warn);border:1px solid var(--warn);color:#fff;font-weight:700}
+.cd.leave .rb{opacity:.35}
 .btn.danger{background:var(--warn);border-color:var(--warn);color:#fff}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
 .seg button{border:0;background:none;padding:6px 12px;border-right:1px solid var(--line)}
@@ -182,6 +189,7 @@ table.al th{font-weight:500;background:var(--surface2);text-align:left}
 table.al thead th{text-align:center}
 .tg{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font-size:12px;margin:1px;color:var(--muted)}
 .tg.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tg.pin.on{background:var(--M);border-color:var(--M);color:#fff}
 .tg.sb.on{background:var(--accent-soft);color:var(--accent);border-style:dashed;border-color:var(--accent)}
 .note{font-size:.86rem;color:var(--muted);margin:6px 0 0}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
@@ -246,19 +254,26 @@ function defaults(){
     nurses:[
       {id:'n1',name:'พนารัตน์ เจดีย์กอง',nick:'',mode:'fixed',quota:0,maxShifts:0,maxReg:6,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>WDR(r)&&s!=='N'?[1,0]:[0,0])},
       {id:'n2',name:'หนึ่งนุช เชนยวนิช',nick:'',mode:'ot',quota:0,maxShifts:0,maxReg:6,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>(r==='1'||r==='4')&&s==='A'?[1,0]:(r==='2'||r==='5')&&s==='N'?[0,1]:[0,0])},
-      {id:'n3',name:'สุดาทิพย์ กรรเชียง',nick:'',mode:'fixed',quota:0,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>WDR(r)&&s==='M'?[1,0]:((r==='5'&&s==='A')||(r==='6'&&s==='N'))?[1,1]:[0,0])},
-      {id:'n4',name:'สุนิตย์ แซ่เติน',nick:'',mode:'ot',quota:0,maxShifts:0,maxReg:12,maxSb:3,maxNight:3,allow:mkAllow((r,s)=>WDR(r)&&s!=='M'?[1,1]:[0,0])},
+      {id:'n3',name:'สุดาทิพย์ กรรเชียง',nick:'',mode:'fixed',quota:0,maxShifts:0,maxReg:0,maxSb:0,maxSbWeek:2,maxNight:0,standing:{'5':{A:1},'6':{N:1}},allow:mkAllow((r,s)=>WDR(r)&&s==='M'?[1,0]:(r==='5'&&s==='A')?[1,1]:(r==='6'&&s==='N')?[1,0]:(WDR(r)&&(s==='A'||s==='N'))?[0,1]:[0,0])},
+      {id:'n4',name:'สุนิตย์ แซ่เติน',nick:'',mode:'ot',quota:0,maxShifts:0,maxReg:12,maxSb:3,maxNight:3,subPool:['n8','n6'],allow:mkAllow((r,s)=>WDR(r)&&s!=='M'?[1,1]:[0,0])},
       run('n5','ศิริพร ภูลังกา'),run('n6','เมธินี กำธรนิมิตร'),run('n7','ชัญญานุช มีคำ'),run('n8','อชิรญา เสารางทอย'),run('n9','นุชนาฏ ปันปั๋น'),
       {id:'n10',name:'ณัฐรดา พิษสมอญ',nick:'',mode:'quota',quota:12,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>(r==='1'||r==='2')&&s==='M'?[0,0]:[1,1])},
       {id:'n11',name:'สาวิตรี อินธรรม',nick:'',mode:'ot',quota:0,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>WDR(r)?(s==='N'?[0,1]:[0,0]):[1,1])}
     ],
     staffing:{wd:{N:{r:2,s:1},M:{r:4,s:0},A:{r:2,s:1}},hol:{N:{r:2,s:1},M:{r:3,s:1},A:{r:2,s:1}}},
-    rules:{maxConsec:3,forbidNMA:true,fixedCount:true,quotaOrder:'date',sbInQuota:false,carry:true,effort:2},
+    rules:{maxConsec:3,forbidNMA:true,noSbBeforeMax:true,leaveGap:true,fixedCount:true,quotaOrder:'date',sbInQuota:false,carry:true,effort:2},
     groups:[{members:['n10','n2','n11'],shifts:['A','N'],sb:false}],
-    holOverride:{},requests:{},rosters:{},locks:{}};
+    holOverride:{},requests:{},rosters:{},locks:{},leaves:{},ic:{},mig:{sudathip2:1,sudathip3:1}};
 }
 function load(){try{const s=localStorage.getItem(LS);if(s){const o=JSON.parse(s);if(o&&o.v===3)return o}}catch(e){}return null}
-let S=load()||defaults();
+let S=load()||defaults();S.leaves=S.leaves||{};
+function normalize(){S.leaves=S.leaves||{};S.ic=S.ic||{};S.mig=S.mig||{};let ch=false;const byName=nm=>S.nurses.find(x=>x.name===nm)?.id;
+  S.nurses.forEach(n=>{if(n.subPool===undefined){n.subPool=n.name==='สุนิตย์ แซ่เติน'?['อชิรญา เสารางทอย','เมธินี กำธรนิมิตร'].map(byName).filter(Boolean):[];ch=true}});
+  if(!S.mig.sudathip2){const n=S.nurses.find(x=>x.name==='สุดาทิพย์ กรรเชียง');if(n){n.allow=mkAllow((r,s)=>WDR(r)&&s==='M'?[1,0]:(r==='5'&&s==='A')?[1,1]:(r==='6'&&s==='N')?[1,0]:(WDR(r)&&(s==='A'||s==='N'))?[0,1]:[0,0]);n.maxSbWeek=2;n.maxSb=0}S.mig.sudathip2=1;ch=true}
+  if(!S.mig.noMonNightSb){['สุดาทิพย์ กรรเชียง','สุนิตย์ แซ่เติน'].forEach(nm=>{const n=S.nurses.find(x=>x.name===nm);if(n&&n.allow&&n.allow['1'])n.allow['1'].N[1]=false});S.mig.noMonNightSb=1;ch=true}
+  if(!S.mig.sudathip3){const n=S.nurses.find(x=>x.name==='สุดาทิพย์ กรรเชียง');if(n)n.standing={'5':{A:1},'6':{N:1}};S.mig.sudathip3=1;ch=true}
+  return ch}
+normalize();
 /* ---------- storage backends: claude.ai db, or Google Sheets (Apps Script) ---------- */
 // ถ้านำไปวางบน GitHub: ใส่ URL ของ Web App จาก Apps Script ตรงนี้ คนที่เปิดลิงก์จะกรอกแค่รหัสครั้งเดียว
 const DEFAULT_GAS_URL='';
@@ -275,8 +290,8 @@ function setSync(st){syncState=st;const el=document.getElementById('sync');if(!e
     auth:['bad','รหัส Google Sheets ไม่ถูกต้อง ตอนนี้บันทึกเฉพาะเครื่องนี้'],net:['bad','ติดต่อ Google Sheets ไม่ได้ ตอนนี้บันทึกเฉพาะเครื่องนี้']}[st];
   el.className='side-note sync '+M[0];el.querySelector('span').textContent=M[1]}
 function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}dirty.add(curMk());if(BK&&!dbRO){clearTimeout(syncT);setSync('saving');syncT=setTimeout(syncNow,BKKIND==='gas'?1500:700)}}
-const cfgDoc=()=>({v:3,year:S.year,month:S.month,nurses:S.nurses,staffing:S.staffing,rules:S.rules,groups:S.groups,holOverride:S.holOverride,at:Date.now()});
-const monthDoc=mk=>({requests:S.requests[mk]||{},roster:S.rosters[mk]||null,locks:S.locks[mk]||{},at:Date.now()});
+const cfgDoc=()=>({v:3,year:S.year,month:S.month,nurses:S.nurses,staffing:S.staffing,rules:S.rules,groups:S.groups,holOverride:S.holOverride,mig:S.mig||{},at:Date.now()});
+const monthDoc=mk=>({leaves:S.leaves[mk]||{},ic:(S.ic||{})[mk]||{},requests:S.requests[mk]||{},roster:S.rosters[mk]||null,locks:S.locks[mk]||{},at:Date.now()});
 function claudeBk(db){return {
   async save(items){for(const it of items)await db.doc(it.key==='config'?'roster/config':'months/'+it.key.slice(6)).set(it.value)},
   async load(){const cs=await db.doc('roster/config').get();const months={};
@@ -295,17 +310,17 @@ async function syncNow(){
   catch(e){const c=e&&e.code;ms.forEach(m=>dirty.add(m));
     if(c==='invalid_argument'){dbRO=true;setSync('ro')}else if(c==='quota_exceeded')setSync('quota');else if(c==='auth')setSync('auth');else if(c==='net')setSync('net');else setSync('err');return false}
 }
-function allMonthKeys(){return [...new Set([...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks),curMk()])]}
+function allMonthKeys(){return [...new Set([...Object.keys(S.ic||{}),...Object.keys(S.leaves||{}),...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks),curMk()])]}
 async function connectBackend(bk,kind,canW){
   BK=bk;BKKIND=kind;dbRO=false;setSync('loading');
   const data=await bk.load();
   if(data.config&&data.config.v===3){
-    const d=data.config;S.nurses=d.nurses;S.staffing=d.staffing;S.rules=d.rules;S.groups=d.groups;S.holOverride=d.holOverride||{};
+    const d=data.config;S.nurses=d.nurses;S.staffing=d.staffing;S.rules=d.rules;S.groups=d.groups;S.holOverride=d.holOverride||{};S.mig=d.mig||{};
     if(typeof d.year==='number'){S.year=d.year;S.month=d.month}
-    Object.entries(data.months).forEach(([mk,x])=>{x=x||{};S.requests[mk]=x.requests||{};S.locks[mk]=x.locks||{};if(x.roster)S.rosters[mk]=x.roster;else delete S.rosters[mk]});
-    S=JSON.parse(JSON.stringify(S));draft=null;
+    Object.entries(data.months).forEach(([mk,x])=>{x=x||{};S.requests[mk]=x.requests||{};S.leaves[mk]=x.leaves||{};S.ic=S.ic||{};S.ic[mk]=x.ic||{};S.locks[mk]=x.locks||{};if(x.roster)S.rosters[mk]=x.roster;else delete S.rosters[mk]});
+    S=JSON.parse(JSON.stringify(S));const migrated=normalize();draft=null;
     try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
-    if(canW===false){dbRO=true;setSync('ro')}else setSync('saved');
+    if(canW===false){dbRO=true;setSync('ro')}else{setSync('saved');if(migrated){dirty.add(curMk());await syncNow()}}
     return 'loaded';
   }
   if(canW===false){dbRO=true;setSync('ro');return 'empty'}
@@ -354,11 +369,18 @@ function isHol(y,m,d,dow){const k=`${y}-${pad(m+1)}-${pad(d)}`;if(k in S.holOver
 function ctxFor(y,m){
   const D=new Date(y,m+1,0).getDate(),days=[];
   for(let d=1;d<=D;d++){const dow=new Date(y,m,d).getDay(),hol=isHol(y,m,d,dow);
-    days.push({d,dow,hol,row:hol&&dow>=1&&dow<=5?'ph':String(dow),need:S.staffing[hol?'hol':'wd']})}
+    days.push({d,dow,hol,wk:Math.floor((d-1+((new Date(y,m,1).getDay()+6)%7))/7),row:hol&&dow>=1&&dow<=5?'ph':String(dow),need:S.staffing[hol?'hol':'wd']})}
   return {y,m,D,L:D*3,days,mk:`${y}-${pad(m+1)}`};
 }
 const ctx=()=>ctxFor(S.year,S.month);
-const req=(c,nid,d,s)=>S.requests[c.mk]?.[nid]?.[d]?.[s]||0;
+const sbInWeek=(c,Ai,di)=>{const wk=c.days[di].wk;let k=0;c.days.forEach((x,j)=>{if(x.wk===wk)for(let q=0;q<3;q++)if(Ai[j*3+q]===2)k++});return k};
+const isStanding=(n,day,s)=>!!(n.standing&&n.standing[String(day.dow)]&&n.standing[String(day.dow)][s])&&!isFixedSlot(n,day,s);
+const isIC=(c,nid,d)=>!!S.ic?.[c.mk]?.[nid]?.[d];
+const hasSub=n=>(n.subPool||[]).length>0;
+const isLeave=(c,nid,d)=>!!S.leaves[c.mk]?.[nid]?.[d];
+const req=(c,nid,d,s)=>isLeave(c,nid,d)?2:(S.requests[c.mk]?.[nid]?.[d]?.[s]||0);
+const leaveCount=(c,nid)=>c.days.filter(day=>!day.hol&&isLeave(c,nid,day.d)).length;
+const effQuota=(n,c)=>n.mode==='quota'?Math.max(0,(+n.quota||0)-leaveCount(c,n.id)):0;
 const isFixedSlot=(n,day,s)=>n.mode==='fixed'&&s==='M'&&!day.hol;
 const modeLabel=n=>n.mode==='fixed'?'เช้าวันธรรมดาประจำ ที่เหลือ OT':n.mode==='quota'?`รันเวร ${n.quota} เวรแรกเป็นเวรปกติ`:'OT ทั้งหมด';
 const shortName=n=>n.nick||n.name.split(' ')[0];
@@ -373,14 +395,25 @@ function prevTail(c){
   S.nurses.forEach((n,i)=>{const a=R.a[n.id];if(a&&a.length>=6)out[i]=Uint8Array.from(a.slice(a.length-6))});
   return out;
 }
+const sbBeforeRun=(Ai,idx,maxC)=>{if(S.rules.noSbBeforeMax===false)return false;let k=0;for(let j=idx+1;j<Ai.length&&(Ai[j]===1||Ai[j]===3);j++)k++;return k>=maxC};
+const leaveBlocked=(c,nid,di,s)=>S.rules.leaveGap!==false&&((s==='A'&&di+1<c.D&&!c.days[di+1].hol&&isLeave(c,nid,c.days[di+1].d))||(s==='N'&&di>0&&!c.days[di-1].hol&&isLeave(c,nid,c.days[di-1].d)));
 function runOK(Ai,idx,maxC,nma,prev){
-  let L=0;for(let j=idx-1;j>=-6;j--){const v=j>=0?Ai[j]:prev[6+j];if(v!==1)break;L++}
-  let R=0;for(let j=idx+1;j<Ai.length&&Ai[j]===1;j++)R++;
+  let L=0;for(let j=idx-1;j>=-6;j--){const v=j>=0?Ai[j]:prev[6+j];if(v!==1&&v!==3)break;L++}
+  let R=0;for(let j=idx+1;j<Ai.length&&(Ai[j]===1||Ai[j]===3);j++)R++;
   if(L+R+1>maxC)return false;
-  if(nma){const d0=idx-idx%3;let all=true;for(let k=0;k<3;k++)if(d0+k!==idx&&Ai[d0+k]!==1)all=false;if(all)return false}
+  if(L+R+1===maxC&&S.rules.noSbBeforeMax!==false){const pre=idx-L-1;const v=pre>=0?Ai[pre]:(pre>=-6?prev[6+pre]:0);if(v===2)return false}
+  if(nma){const d0=idx-idx%3;let all=true;for(let k=0;k<3;k++)if(d0+k!==idx&&Ai[d0+k]!==1&&Ai[d0+k]!==3)all=false;if(all)return false}
   return true;
 }
 
+const isR=v=>v===1||v===3;
+/* substitute requirements: weekday leave of a nurse with a substitute pool -> one extra morning shift from that pool */
+function subReqs(c){
+  const out={},ids=new Set(S.nurses.map(n=>n.id));
+  S.nurses.forEach(n=>{const pool=(n.subPool||[]).filter(id=>id!==n.id&&ids.has(id));if(!pool.length)return;
+    c.days.forEach((day,di)=>{if(day.hol)return;const why=isLeave(c,n.id,day.d)?'ลา':isIC(c,n.id,day.d)?'ไปงาน IC':'';if(why){const idx=di*3+1;(out[idx]=out[idx]||[]).push({for:n.id,pool,why})}})});
+  return out;
+}
 /* ================= engine ================= */
 function waterfill(arr,total){
   const f=L=>arr.map(a=>Math.max(0,Math.min(a.cap,a.lo+L)));
@@ -388,22 +421,24 @@ function waterfill(arr,total){
   return f(hi);
 }
 function prep(c){
-  const L=c.L,lockM=S.locks[c.mk]||{},prev=prevTail(c);
+  const L=c.L,lockM=S.locks[c.mk]||{},prev=prevTail(c),SR=subReqs(c);
   const P=S.nurses.map((n,i)=>{
-    const eR=new Uint8Array(L),eS=new Uint8Array(L),fixed=new Uint8Array(L),init=new Uint8Array(L),locked=new Uint8Array(L),want=[];
+    const eSub=new Uint8Array(L),eR=new Uint8Array(L),eS=new Uint8Array(L),fixed=new Uint8Array(L),init=new Uint8Array(L),locked=new Uint8Array(L),pinned=new Uint8Array(L),want=[];
     const lk=lockM[n.id]||{};
     c.days.forEach((day,di)=>SH.forEach((s,si)=>{
-      const idx=di*3+si,rq=req(c,n.id,day.d,s),al=n.allow[day.row][s];
+      const idx=di*3+si,rq=leaveBlocked(c,n.id,di,s)?2:req(c,n.id,day.d,s),al=n.allow[day.row][s];
       if(rq===1)want.push(idx);
       if(isFixedSlot(n,day,s)){fixed[idx]=1;if(al[0]&&rq!==2)init[idx]=1}
       if(idx in lk){locked[idx]=1;init[idx]=lk[idx];return}
+      if(rq!==2&&isStanding(n,day,s)){init[idx]=1;pinned[idx]=1;return}
       if(fixed[idx]||rq===2)return;
       if(al[0]&&day.need[s].r>0)eR[idx]=1;
       if(al[1]&&day.need[s].s>0)eS[idx]=1;
+      if(SR[idx]&&al[0]&&SR[idx].some(q=>q.pool.includes(n.id)))eSub[idx]=1;
     }));
-    return {n,i,eR,eS,fixed,init,locked,want,wantSet:new Set(want),
-      base:n.mode==='quota'?(+n.quota||0):0,
-      cap:(+n.maxShifts>0)?+n.maxShifts:1e9,capR:(+n.maxReg>0)?+n.maxReg:1e9,capS:(+n.maxSb>0)?+n.maxSb:1e9,maxN:(+n.maxNight>0)?+n.maxNight:1e9,ER:sum(eR),ES:sum(eS)};
+    return {n,i,eR,eS,eSub,fixed,init,locked,pinned,want,wantSet:new Set(want),
+      base:effQuota(n,c),
+      cap:(+n.maxShifts>0)?+n.maxShifts:1e9,capR:(+n.maxReg>0)?+n.maxReg:1e9,capS:(+n.maxSb>0)?+n.maxSb:1e9,maxN:(+n.maxNight>0)?+n.maxNight:1e9,capSW:(+n.maxSbWeek>0)?+n.maxSbWeek:0,ER:sum(eR.map((v,k)=>v||eSub[k])),ES:sum(eS)};
   });
   const needR=new Int16Array(L),needS=new Int16Array(L),cntR=new Int16Array(L);
   c.days.forEach((day,di)=>SH.forEach((s,si)=>{const idx=di*3+si;needR[idx]=day.need[s].r;needS[idx]=day.need[s].s;
@@ -414,48 +449,51 @@ function prep(c){
   const groups=S.groups.map(g=>({m:g.members.map(id=>idI[id]).filter(x=>x!=null),sh:new Set(g.shifts),sb:g.sb}));
   const ginfo=P.map((p,i)=>groups.filter(g=>g.m.includes(i)&&g.m.length>1));
   // remaining demand after fixed + locked
+  const subNeed=new Int16Array(L);Object.entries(SR).forEach(([k,v])=>subNeed[+k]=v.length);
   let remR=0,remS=0;
-  for(let idx=0;idx<L;idx++){let r=0,s=0;P.forEach((p,i)=>{if(p.init[idx]===1&&regCounts[i][idx])r++;if(p.init[idx]===2)s++});remR+=Math.max(0,needR[idx]-r);remS+=Math.max(0,needS[idx]-s)}
-  const preR=P.map(p=>{let k=0;for(let idx=0;idx<L;idx++)if(p.init[idx]===1&&!p.fixed[idx])k++;return k});
+  for(let idx=0;idx<L;idx++){let r=0,s=0;P.forEach((p,i)=>{if(p.init[idx]===1&&regCounts[i][idx])r++;if(p.init[idx]===2)s++});remR+=Math.max(0,needR[idx]-r);remS+=Math.max(0,needS[idx]-s);let s3=0;P.forEach(p=>{if(p.init[idx]===3)s3++});remR+=Math.max(0,subNeed[idx]-s3)}
+  const preR=P.map(p=>{let k=0;for(let idx=0;idx<L;idx++)if((p.init[idx]===1&&!p.fixed[idx])||p.init[idx]===3)k++;return k});
   const preS=P.map(p=>{let k=0;for(let idx=0;idx<L;idx++)if(p.init[idx]===2)k++;return k});
   const tRx=waterfill(P.map((p,i)=>({lo:Math.max(0,Math.min(p.base,p.ER+preR[i])-preR[i]),cap:Math.max(0,Math.min(p.ER,p.capR-preR[i],p.cap-preR[i]-preS[i]))})),remR);
   const tR=tRx.map((v,i)=>v+preR[i]);
   const tSx=waterfill(P.map((p,i)=>({lo:0,cap:Math.max(0,Math.min(p.ES,p.capS-preS[i],p.cap-tR[i]-preS[i]))})),remS);
   const tS=tSx.map((v,i)=>v+preS[i]);
-  return {c,P,needR,needS,regCounts,ginfo,tR,tS,prev,maxC:+S.rules.maxConsec||3,nma:!!S.rules.forbidNMA};
+  return {c,P,needR,needS,subNeed,regCounts,ginfo,tR,tS,prev,maxC:+S.rules.maxConsec||3,nma:!!S.rules.forbidNMA};
 }
 /* feasibility for putting nurse i into idx with type t, given row counts */
 function canPut(X,A,i,idx,t,nf,nights,nr,ns){
   const p=X.P[i],si=idx%3,s=SH[si];
   if(A[i][idx]||p.locked[idx])return false;
-  if(!(t===1?p.eR[idx]:p.eS[idx]))return false;
+  if(!(t===1?p.eR[idx]:t===3?p.eSub[idx]:p.eS[idx]))return false;
   if(nf>=p.cap)return false;
-  if(t===1&&nr>=p.capR)return false;
+  if(isR(t)&&nr>=p.capR)return false;
   if(t===2&&ns>=p.capS)return false;
+  if(t===2&&p.capSW&&sbInWeek(X.c,A[i],(idx/3)|0)>=p.capSW)return false;
   if(si===0&&nights>=p.maxN)return false;
-  for(const g of X.ginfo[i]){if(!g.sh.has(s))continue;for(const m of g.m){if(m===i)continue;const v=A[m][idx];if(v&&(g.sb||(v===1&&t===1)))return false}}
-  if(t===1&&!runOK(A[i],idx,X.maxC,X.nma,X.prev[i]))return false;
+  for(const g of X.ginfo[i]){if(!g.sh.has(s))continue;for(const m of g.m){if(m===i)continue;const v=A[m][idx];if(v&&(g.sb||(isR(v)&&isR(t))))return false}}
+  if(isR(t)&&!runOK(A[i],idx,X.maxC,X.nma,X.prev[i]))return false;
+  if(t===2&&sbBeforeRun(A[i],idx,X.maxC))return false;
   return true;
 }
-function rowStats(X,A,i){const p=X.P[i];let nf=0,nights=0,nr=0,ns=0;for(let idx=0;idx<A[i].length;idx++){const v=A[i][idx];if(!v)continue;if(!(v===1&&p.fixed[idx])){nf++;if(v===1)nr++}if(v===2)ns++;if(idx%3===0)nights++}return {nf,nights,nr,ns}}
+function rowStats(X,A,i){const p=X.P[i];let nf=0,nights=0,nr=0,ns=0;for(let idx=0;idx<A[i].length;idx++){const v=A[i][idx];if(!v)continue;if(!(v===1&&p.fixed[idx])){nf++;if(isR(v))nr++}if(v===2)ns++;if(idx%3===0)nights++}return {nf,nights,nr,ns}}
 
 function greedy(X,jit){
-  const {c,P,needR,needS,regCounts,tR,tS}=X,L=c.L,n=P.length;
+  const {c,P,needR,needS,subNeed,regCounts,tR,tS}=X,L=c.L,n=P.length;
   const A=P.map(p=>Uint8Array.from(p.init));
   const reg=new Float64Array(n),sb=new Float64Array(n),night=new Float64Array(n),hol=new Float64Array(n),nf=new Float64Array(n),eR=new Float64Array(n),eS=new Float64Array(n);
-  P.forEach((p,i)=>{for(let idx=0;idx<L;idx++){const v=A[i][idx];if(!v)continue;if(!(v===1&&p.fixed[idx]))nf[i]++;if(v===1&&!p.fixed[idx])reg[i]++;if(v===2)sb[i]++;if(idx%3===0)night[i]++;if(c.days[(idx/3)|0].hol)hol[i]++}});
+  P.forEach((p,i)=>{for(let idx=0;idx<L;idx++){const v=A[i][idx];if(!v)continue;if(!(v===1&&p.fixed[idx]))nf[i]++;if((v===1&&!p.fixed[idx])||v===3)reg[i]++;if(v===2)sb[i]++;if(idx%3===0)night[i]++;if(c.days[(idx/3)|0].hol)hol[i]++}});
   for(let idx=0;idx<L;idx++){
     const di=(idx/3)|0,si=idx%3,day=c.days[di];
-    for(let i=0;i<n;i++){if(P[i].eR[idx])eR[i]++;if(P[i].eS[idx])eS[i]++}
-    let haveR=0,haveS=0;for(let i=0;i<n;i++){if(A[i][idx]===1&&regCounts[i][idx])haveR++;if(A[i][idx]===2)haveS++}
-    for(const t of [1,2]){
-      const need=t===1?needR[idx]-haveR:needS[idx]-haveS;
+    for(let i=0;i<n;i++){if(P[i].eR[idx]||P[i].eSub[idx])eR[i]++;if(P[i].eS[idx])eS[i]++}
+    let haveR=0,haveS=0,have3=0;for(let i=0;i<n;i++){if(A[i][idx]===1&&regCounts[i][idx])haveR++;if(A[i][idx]===2)haveS++;if(A[i][idx]===3)have3++}
+    for(const t of [3,1,2]){
+      const need=t===1?needR[idx]-haveR:t===3?subNeed[idx]-have3:needS[idx]-haveS;
       for(let k=0;k<need;k++){
         let best=-1,bs=Infinity;
         for(let i=0;i<n;i++){
           if(!canPut(X,A,i,idx,t,nf[i],night[i],reg[i],sb[i]))continue;
           const p=P[i];let sc=Math.random()*jit;
-          if(t===1){const pace=tR[i]*eR[i]/Math.max(1,p.ER);sc+=25*(reg[i]-pace);if(reg[i]>=tR[i])sc+=40*(reg[i]-tR[i]+1);if(reg[i]<p.base)sc-=15}
+          if(isR(t)){const pace=tR[i]*eR[i]/Math.max(1,p.ER);sc+=25*(reg[i]-pace);if(reg[i]>=tR[i])sc+=40*(reg[i]-tR[i]+1);if(reg[i]<p.base)sc-=15}
           else{const pace=tS[i]*eS[i]/Math.max(1,p.ES);sc+=25*(sb[i]-pace);if(sb[i]>=tS[i])sc+=40*(sb[i]-tS[i]+1)}
           if(p.wantSet.has(idx))sc-=1000;
           if(si===0)sc+=3*night[i];if(day.hol)sc+=2*hol[i];
@@ -464,22 +502,23 @@ function greedy(X,jit){
           if(sc<bs){bs=sc;best=i}
         }
         if(best<0)continue;
-        A[best][idx]=t;nf[best]++;if(t===1)reg[best]++;else sb[best]++;if(si===0)night[best]++;if(day.hol)hol[best]++;
+        A[best][idx]=t;nf[best]++;if(isR(t))reg[best]++;else sb[best]++;if(si===0)night[best]++;if(day.hol)hol[best]++;
       }
     }
   }
   return A;
 }
 function evalA(X,A){
-  const {c,P,needR,needS,regCounts,tR,tS}=X,L=c.L,n=P.length;
-  let uR=0,uS=0,over=0,obj=0,unmet=0;
-  for(let idx=0;idx<L;idx++){let r=0,s=0;for(let i=0;i<n;i++){const v=A[i][idx];if(v===1&&regCounts[i][idx])r++;else if(v===2)s++}
+  const {c,P,needR,needS,subNeed,regCounts,tR,tS}=X,L=c.L,n=P.length;
+  let uR=0,uS=0,uT=0,over=0,obj=0,unmet=0;
+  for(let idx=0;idx<L;idx++){let r=0,s=0,s3=0;for(let i=0;i<n;i++){const v=A[i][idx];if(v===1&&regCounts[i][idx])r++;else if(v===2)s++;else if(v===3)s3++}
+    if(s3<subNeed[idx])uT+=subNeed[idx]-s3;else over+=s3-subNeed[idx];
     if(r<needR[idx])uR+=needR[idx]-r;else over+=r-needR[idx];if(s<needS[idx])uS+=needS[idx]-s;else over+=s-needS[idx]}
-  obj+=uR*1e5+uS*2e4+over*5e3;
+  obj+=(uR+uT)*1e5+uS*2e4+over*5e3;
   const nightQ=[],holQ=[];
   P.forEach((p,i)=>{
     let reg=0,sb=0,night=0,hol=0,dbl=0;const Ai=A[i];
-    for(let idx=0;idx<L;idx++){const v=Ai[idx];if(!v)continue;if(v===1&&!p.fixed[idx])reg++;if(v===2)sb++;if(idx%3===0)night++;if(c.days[(idx/3)|0].hol)hol++}
+    for(let idx=0;idx<L;idx++){const v=Ai[idx];if(!v)continue;if((v===1&&!p.fixed[idx])||v===3)reg++;if(v===2)sb++;if(idx%3===0)night++;if(c.days[(idx/3)|0].hol)hol++}
     for(let d=0;d<c.D;d++){let k=0;for(let q=0;q<3;q++)if(Ai[d*3+q])k++;if(k>=2)dbl++}
     p.want.forEach(idx=>{if(!Ai[idx]){obj+=2000;unmet++}});
     obj+=30*(reg-tR[i])**2+15*(sb-tS[i])**2+3*dbl;
@@ -488,7 +527,7 @@ function evalA(X,A){
   });
   const vr=a=>{if(!a.length)return 0;const m=sum(a)/a.length;return sum(a.map(x=>(x-m)**2))};
   obj+=10*vr(nightQ)+5*vr(holQ);
-  return {obj,uR,uS,unmet};
+  return {obj,uR,uS,uT,unmet};
 }
 /* local search: move single assignments between nurses */
 function improve(X,A,iters){
@@ -496,10 +535,10 @@ function improve(X,A,iters){
   for(let it=0;it<iters;it++){
     const idx=(Math.random()*L)|0;
     // pick a mover: either an existing assignee (move) or an empty spot (fill)
-    const holders=[];for(let i=0;i<n;i++){const v=A[i][idx];if(v&&!P[i].locked[idx]&&!(v===1&&P[i].fixed[idx]))holders.push(i)}
+    const holders=[];for(let i=0;i<n;i++){const v=A[i][idx];if(v&&!P[i].locked[idx]&&!P[i].pinned[idx]&&!(v===1&&P[i].fixed[idx]))holders.push(i)}
     const fill=Math.random()<.25;
     let j=-1,t;
-    if(fill||!holders.length){t=Math.random()<.6?1:2}else{j=holders[(Math.random()*holders.length)|0];t=A[j][idx]}
+    if(fill||!holders.length){t=X.subNeed[idx]&&Math.random()<.4?3:Math.random()<.6?1:2}else{j=holders[(Math.random()*holders.length)|0];t=A[j][idx]}
     const cands=[];for(let i=0;i<n;i++){if(i===j)continue;cands.push(i)}
     const i=cands[(Math.random()*cands.length)|0];
     if(j>=0)A[j][idx]=0;
@@ -525,26 +564,28 @@ async function generate(){
   const ev=evalA(X,best);
   const a={};S.nurses.forEach((n,i)=>a[n.id]=Array.from(best[i]));
   S.rosters[c.mk]={a,at:Date.now()};save();busy=false;render();
-  toast(ev.uR||ev.uS?`จัดเสร็จ แต่ยังขาด: เวรปกติ ${ev.uR} / standby ${ev.uS} — ดูรายละเอียดใต้ตาราง`:'จัดตารางเสร็จ ครบทุกเวร');
+  toast(ev.uR||ev.uS||ev.uT?`จัดเสร็จ แต่ยังขาด: เวรปกติ ${ev.uR} / standby ${ev.uS}${ev.uT?` / ผู้ทดแทน ${ev.uT}`:''} — ดูรายละเอียดใต้ตาราง`:'จัดตารางเสร็จ ครบทุกเวร');
 }
 function getA(c){const R=S.rosters[c.mk];if(!R)return null;return S.nurses.map(n=>R.a[n.id]&&R.a[n.id].length===c.L?Uint8Array.from(R.a[n.id]):new Uint8Array(c.L))}
 function setA(c,A){const a={};S.nurses.forEach((n,i)=>a[n.id]=Array.from(A[i]));S.rosters[c.mk]={a,at:Date.now()};save()}
 
 /* ================= checks & summary ================= */
 function validate(c,A){
-  const issues=[],cell={},cov=[],maxC=+S.rules.maxConsec||3,nma=!!S.rules.forbidNMA,prev=prevTail(c);
+  const issues=[],cell={},cov=[],maxC=+S.rules.maxConsec||3,nma=!!S.rules.forbidNMA,prev=prevTail(c),SR=subReqs(c);
   const mark=(i,idx,m)=>{(cell[i+':'+idx]=cell[i+':'+idx]||[]).push(m)};
   const idI={};S.nurses.forEach((n,i)=>idI[n.id]=i);
   const dt=d=>`${d} ${MON[c.m].slice(0,3)}.`;
   c.days.forEach((day,di)=>SH.forEach((s,si)=>{
     const idx=di*3+si;let r=0,sb=0;
     S.nurses.forEach((n,i)=>{const v=A[i][idx];if(v===1&&countsReg(n,day,s))r++;if(v===2)sb++});
-    const nr=day.need[s].r,ns=day.need[s].s;cov[idx]={r,sb,nr,ns};
+    const nr=day.need[s].r,ns=day.need[s].s;cov[idx]={r,sb,nr,ns,subN:(SR[idx]||[]).length,subH:S.nurses.filter((n,i)=>A[i][idx]===3).length};
+    if(cov[idx].subH<cov[idx].subN)issues.push({e:1,t:`${dt(day.d)} เวรเช้า: ยังไม่มีผู้ทดแทน ${SR[idx].map(q=>shortName(S.nurses.find(n=>n.id===q.for))+' ที่'+q.why).join(', ')}`});
+    if(cov[idx].subH>cov[idx].subN)issues.push({e:0,t:`${dt(day.d)} เวรเช้า: ผู้ทดแทนเกิน ${cov[idx].subH-cov[idx].subN} คน`});
     if(r<nr)issues.push({e:1,t:`${dt(day.d)} เวร${SHN[s]}: ขาดเวรปกติ ${nr-r} คน`});
     if(sb<ns)issues.push({e:1,t:`${dt(day.d)} เวร${SHN[s]}: ขาด standby ${ns-sb} คน`});
     if(r>nr)issues.push({e:0,t:`${dt(day.d)} เวร${SHN[s]}: เวรปกติเกิน ${r-nr} คน`});
     if(sb>ns)issues.push({e:0,t:`${dt(day.d)} เวร${SHN[s]}: standby เกิน ${sb-ns} คน`});
-    S.groups.forEach(g=>{if(!g.shifts.includes(s))return;const on=g.members.map(id=>idI[id]).filter(i=>i!=null&&(g.sb?A[i][idx]>0:A[i][idx]===1));
+    S.groups.forEach(g=>{if(!g.shifts.includes(s))return;const on=g.members.map(id=>idI[id]).filter(i=>i!=null&&(g.sb?A[i][idx]>0:isR(A[i][idx])));
       if(on.length>1)on.forEach(i=>mark(i,idx,'อยู่เวรเดียวกับคนในกลุ่มที่ห้ามอยู่ด้วยกัน'))});
   }));
   S.nurses.forEach((n,i)=>{
@@ -554,18 +595,23 @@ function validate(c,A){
       if(rq===1&&!v)unmet++;
       if(!v)return;
       const fx=v===1&&isFixedSlot(n,day,s);
-      if(!fx){nf++;if(v===1)regNF++}if(si===0)nights++;if(v===1)reg++;else sb++;
-      if(rq===2)mark(i,idx,`ขึ้นเวร${SHN[s]}ในวันที่ขอไม่ขึ้น`);
+      if(!fx){nf++;if(isR(v))regNF++}if(si===0)nights++;if(isR(v))reg++;else sb++;
+      if(v===3&&!(SR[idx]||[]).some(q=>q.pool.includes(n.id)))mark(i,idx,'วันนี้ไม่มีคนลาหรือไปงาน IC ที่ต้องทดแทน หรือไม่อยู่ในรายชื่อผู้ทดแทน');
+      if(rq===2)mark(i,idx,isLeave(c,n.id,day.d)?'มีเวรในวันลา':`ขึ้นเวร${SHN[s]}ในวันที่ขอไม่ขึ้น`);
       const al=n.allow[day.row][s];
-      if((v===1&&!al[0])||(v===2&&!al[1]))mark(i,idx,`เงื่อนไขไม่ให้ขึ้น${v===2?' standby ':''}เวร${SHN[s]}วันนี้`);
-      if(v===1&&!runOK(Ai,idx,maxC,nma,prev[i]))mark(i,idx,`เวรปกติติดกันเกิน ${maxC} เวร หรือเป็นดึก-เช้า-บ่าย`);
+      if((isR(v)&&!al[0])||(v===2&&!al[1]))mark(i,idx,`เงื่อนไขไม่ให้ขึ้น${v===2?' standby ':''}เวร${SHN[s]}วันนี้`);
+      if(isR(v)&&!runOK(Ai,idx,maxC,nma,prev[i]))mark(i,idx,`เวรปกติติดกันเกิน ${maxC} เวร, เป็นดึก-เช้า-บ่าย หรือมี standby อยู่ก่อนเวรติดกัน ${maxC} เวร`);
+      if(v===2&&sbBeforeRun(Ai,idx,maxC))mark(i,idx,`มี standby อยู่ก่อนเวรปกติติดกัน ${maxC} เวร`);
+      if(leaveBlocked(c,n.id,di,s))mark(i,idx,s==='A'?'เวรบ่ายก่อนวันลา':'เวรดึกหลังวันลา');
     }));
     if(+n.maxShifts>0&&nf>+n.maxShifts)issues.push({e:1,t:`${n.name}: ${nf} เวร เกินที่กำหนด ${n.maxShifts} เวร`});
     if(+n.maxReg>0&&regNF>+n.maxReg)issues.push({e:1,t:`${n.name}: เวรปกติ ${regNF} เวร เกินที่กำหนด ${n.maxReg} เวร`});
+    c.days.forEach((day,di)=>SH.forEach((s,si)=>{if(isStanding(n,day,s)&&req(c,n.id,day.d,s)!==2&&!leaveBlocked(c,n.id,di,s)&&Ai[di*3+si]!==1)issues.push({e:1,t:`${n.name} ${dt(day.d)}: ไม่ได้อยู่เวร${SHN[s]}ประจำ`})}));
+    if(+n.maxSbWeek>0){const wks={};c.days.forEach((x,j)=>{for(let q=0;q<3;q++)if(Ai[j*3+q]===2)wks[x.wk]=(wks[x.wk]||0)+1});Object.entries(wks).forEach(([w,k])=>{if(k>+n.maxSbWeek)issues.push({e:1,t:`${n.name}: standby สัปดาห์ที่ ${+w+1} ของเดือน ${k} เวร เกินที่กำหนด ${n.maxSbWeek} เวร/สัปดาห์`})})}
     if(+n.maxSb>0&&sb>+n.maxSb)issues.push({e:1,t:`${n.name}: standby ${sb} เวร เกินที่กำหนด ${n.maxSb} เวร`});
     if(+n.maxNight>0&&nights>+n.maxNight)issues.push({e:1,t:`${n.name}: เวรดึก ${nights} เวร เกินที่กำหนด ${n.maxNight} เวร`});
     const q=reg+(S.rules.sbInQuota?sb:0);
-    if(n.mode==='quota'&&q<+n.quota)issues.push({e:1,t:`${n.name}: นับเวรได้ ${q} เวร ยังไม่ถึงโควตา ${n.quota} เวร`});
+    if(n.mode==='quota'&&q<effQuota(n,c))issues.push({e:1,t:`${n.name}: นับเวรได้ ${q} เวร ยังไม่ถึงโควตา ${effQuota(n,c)} เวร`});
     if(unmet)issues.push({e:0,t:`${n.name}: คำขอขึ้นเวรที่ยังไม่ได้ ${unmet} เวร`});
   });
   Object.entries(cell).forEach(([k,m])=>{const [i,idx]=k.split(':').map(Number);const day=c.days[(idx/3)|0];
@@ -574,20 +620,20 @@ function validate(c,A){
 }
 function classify(c,A,i){
   const n=S.nurses[i],list=[];
-  c.days.forEach((day,di)=>SH.forEach((s,si)=>{const v=A[i][di*3+si];if(v)list.push({di,day,s,v,hol:day.hol,fixed:v===1&&isFixedSlot(n,day,s),wdM:!day.hol&&s==='M'})}));
+  c.days.forEach((day,di)=>SH.forEach((s,si)=>{const v=A[i][di*3+si];if(v)list.push({di,day,s,v,sub:v===3,hol:day.hol,fixed:v===1&&isFixedSlot(n,day,s),wdM:!day.hol&&s==='M'})}));
   list.forEach(x=>x.lab=x.v===2?'SB':'OT');
   if(n.mode==='fixed')list.forEach(x=>{if(x.fixed)x.lab='WORK'});
   else if(n.mode==='quota'){
-    let pool=list.filter(x=>x.v===1||(S.rules.sbInQuota&&x.v===2));
-    if(S.rules.quotaOrder==='wdM')pool=[...pool.filter(x=>x.wdM&&x.v===1),...pool.filter(x=>!(x.wdM&&x.v===1))];
-    pool.slice(0,+n.quota||0).forEach(x=>x.lab='WORK');
+    let pool=list.filter(x=>isR(x.v)||(S.rules.sbInQuota&&x.v===2));
+    if(S.rules.quotaOrder==='wdM')pool=[...pool.filter(x=>x.wdM&&isR(x.v)),...pool.filter(x=>!(x.wdM&&isR(x.v)))];
+    pool.slice(0,effQuota(n,c)).forEach(x=>x.lab='WORK');
   }
   return list;
 }
 function summarize(c,A){
   return S.nurses.map((n,i)=>{
-    const o={n,total:0,nights:0,work:0,ot:{N:[0,0],M:[0,0],A:[0,0]},sb:{N:[0,0],M:[0,0],A:[0,0]}};
-    classify(c,A,i).forEach(x=>{o.total++;if(x.s==='N')o.nights++;
+    const o={n,icd:c.days.filter(day=>!day.hol&&isIC(c,n.id,day.d)&&!isLeave(c,n.id,day.d)).length,leave:leaveCount(c,n.id),qe:effQuota(n,c),total:0,nights:0,work:0,ot:{N:[0,0],M:[0,0],A:[0,0]},sb:{N:[0,0],M:[0,0],A:[0,0]}};
+    o.sub=0;classify(c,A,i).forEach(x=>{o.total++;if(x.sub)o.sub++;if(x.s==='N')o.nights++;
       if(x.lab==='WORK')o.work++;else if(x.lab==='OT')o.ot[x.s][x.hol?1:0]++;else o.sb[x.s][x.hol?1:0]++});
     o.otT=SH.reduce((t,s)=>t+o.ot[s][0]+o.ot[s][1],0);o.sbT=SH.reduce((t,s)=>t+o.sb[s][0]+o.sb[s][1],0);
     return o;
@@ -604,9 +650,9 @@ function render(){
   const m=document.getElementById('main');
   m.innerHTML=page==='roster'?vRoster(c):page==='summary'?vSummary(c):page==='req'?vReq(c):page==='nurses'?vNurses():vStaff(c);
 }
-const K=(s,v,ot)=>`<span class="k ${v===1?'r':'s'} ${s}${ot?' ot':''}">${SHC[s]}</span>`;
+const K=(s,v,ot)=>`<span class="k ${v===2?'s':'r'} ${s}${ot?' ot':''}">${v===3?SHC[s]+'ท':SHC[s]}</span>`;
 function labMaps(c,A){return S.nurses.map((n,i)=>{const m={};classify(c,A,i).forEach(x=>m[x.di*3+SH.indexOf(x.s)]=x.lab);return m})}
-const workLabel=o=>o.n.mode==='quota'?`${o.work}/${o.n.quota}`:o.n.mode==='fixed'?String(o.work):'–';
+const workLabel=o=>o.n.mode==='quota'?`${o.work}/${o.qe}`:o.n.mode==='fixed'?String(o.work):'–';
 function exportBtns(){return `<button class="btn" data-act="xlsx">ส่งออก Excel</button><button class="btn" data-act="print">ส่งออกไฟล์สำหรับพิมพ์</button>`}
 function vRoster(c){
   const A=getA(c);
@@ -621,27 +667,27 @@ function vRoster(c){
   <div class="stats"><span>ขาดเวรปกติ <b class="${shortR?'bad':'good'}">${shortR}</b></span><span>ขาด standby <b class="${shortS?'bad':'good'}">${shortS}</b></span><span>ผิดเงื่อนไข <b class="${errs.length-(shortR||shortS?V.cov.filter(v=>v.r<v.nr||v.sb<v.ns).length:0)>0?'bad':'good'}">${Object.keys(V.cell).length}</b> ช่อง</span>
   <span class="seg" style="margin-left:auto"><button data-act="view" data-v="person" class="${view==='person'?'on':''}">รายคน</button><button data-act="view" data-v="day" class="${view==='day'?'on':''}">รายวัน</button></span></div>`;
   if(view==='person'){
-    h+=`<div class="legend"><span>${K('N',1)} ดึก</span><span>${K('M',1)} เช้า</span><span>${K('A',1)} บ่าย</span><span>${K('A',2)} กรอบเส้นประ = standby</span><span>มุมเขียว/แดง = ขอขึ้น/ขอไม่ขึ้น</span><span>${K('A',1,1)} มีกรอบรอบนอก = นับเป็น OT</span><span>🔒 = ล็อก</span></div>
-    <div class="scroll"><table class="g"><thead><tr><th class="nm">พยาบาล</th>${c.days.map(d=>`<th class="${d.hol?'hol':''}"><span class="dn">${d.d}</span><span class="dw">${DOW[d.dow]}</span></th>`).join('')}<th class="tc">เวรปกติ<br>(โควตา)</th><th class="tc">OT</th><th class="tc">SB</th><th class="tc">รวม</th></tr></thead><tbody>`;
+    h+=`<div class="legend"><span>${K('N',1)} ดึก</span><span>${K('M',1)} เช้า</span><span>${K('A',1)} บ่าย</span><span>${K('A',2)} กรอบเส้นประ = standby</span><span>มุมเขียว/แดง = ขอขึ้น/ขอไม่ขึ้น</span><span>${K('A',1,1)} มีกรอบรอบนอก = นับเป็น OT</span><span>${K('M',3)} เช้าทดแทนคนลา</span><span><span class="lv">ลา</span> วันลา</span><span><span class="ic">IC</span> ไปงาน IC</span><span>🔒 = ล็อก</span></div>
+    <div class="scroll"><table class="g"><thead><tr><th class="nm">พยาบาล</th>${c.days.map(d=>`<th class="${d.hol?'hol':''}"><span class="dn">${d.d}</span><span class="dw">${DOW[d.dow]}</span></th>`).join('')}<th class="tc">ลา</th><th class="tc">เวรปกติ<br>(โควตา)</th><th class="tc">OT</th><th class="tc">SB</th><th class="tc">รวม</th></tr></thead><tbody>`;
     const SM=summarize(c,A),LM=labMaps(c,A);
     S.nurses.forEach((n,i)=>{
       const lk=locks[n.id]||{},o=SM[i];
       h+=`<tr><th class="nm">${i+1}. ${esc(n.name)}<small>${esc(modeLabel(n))}</small></th>`;
       c.days.forEach((day,di)=>{let ch='',bad=false,ro=false,rw=false,isL=false;
         SH.forEach((s,si)=>{const idx=di*3+si,v=A[i][idx];if(v)ch+=K(s,v,LM[i][idx]==='OT');if(V.cell[i+':'+idx])bad=true;if(idx in lk)isL=true;const rq=req(c,n.id,day.d,s);if(rq===2)ro=true;if(rq===1)rw=true});
-        h+=`<td class="c ${day.hol?'hol':''} ${bad?'bad':''} ${ro?'ro':rw?'rw':''}" data-act="cell" data-i="${i}" data-di="${di}" title="${esc(n.name)} วันที่ ${day.d}">${isL?'<span class="lk">🔒</span>':''}<div class="stk">${ch}</div></td>`});
-      h+=`<td class="tc ${n.mode==='quota'&&o.work<+n.quota?'lo':''}">${workLabel(o)}</td><td class="tc ot">${o.otT}</td><td class="tc">${o.sbT}</td><td class="tc">${o.total}</td></tr>`;
+        h+=`<td class="c ${day.hol?'hol':''} ${bad?'bad':''} ${ro?'ro':rw?'rw':''}" data-act="cell" data-i="${i}" data-di="${di}" title="${esc(n.name)} วันที่ ${day.d}">${isL?'<span class="lk">🔒</span>':''}<div class="stk">${isLeave(c,n.id,day.d)?'<span class="lv">ลา</span>':!day.hol&&isIC(c,n.id,day.d)?'<span class="ic">IC</span>':''}${ch}</div></td>`});
+      h+=`<td class="tc">${o.leave||''}</td><td class="tc ${n.mode==='quota'&&o.work<o.qe?'lo':''}">${workLabel(o)}</td><td class="tc ot">${o.otT}</td><td class="tc">${o.sbT}</td><td class="tc">${o.total}</td></tr>`;
     });
     ['M','A','N'].forEach((s,k)=>{const si=SH.indexOf(s);
-      h+=`<tr class="cov ${k===0?'first':''}"><th class="nm">${SHN[s]} มี/ต้องการ</th>${c.days.map((d,di)=>{const v=V.cov[di*3+si];return `<td class="${v.r<v.nr||v.sb<v.ns?'short':''}">${v.r}/${v.nr}${v.ns?`<br>S${v.sb}/${v.ns}`:''}</td>`}).join('')}${k===0?`<td class="tc">${SM.reduce((t,o)=>t+o.work,0)}</td><td class="tc ot">${SM.reduce((t,o)=>t+o.otT,0)}</td><td class="tc">${SM.reduce((t,o)=>t+o.sbT,0)}</td><td class="tc">${SM.reduce((t,o)=>t+o.total,0)}</td>`:'<td colspan="4"></td>'}</tr>`});
+      h+=`<tr class="cov ${k===0?'first':''}"><th class="nm">${SHN[s]} มี/ต้องการ</th>${c.days.map((d,di)=>{const v=V.cov[di*3+si];return `<td class="${v.r<v.nr||v.sb<v.ns||v.subH<v.subN?'short':''}">${v.r}/${v.nr}${v.ns?`<br>S${v.sb}/${v.ns}`:''}${v.subN?`<br>ท${v.subH}/${v.subN}`:''}</td>`}).join('')}${k===0?`<td class="tc">${SM.reduce((t,o)=>t+o.leave,0)}</td><td class="tc">${SM.reduce((t,o)=>t+o.work,0)}</td><td class="tc ot">${SM.reduce((t,o)=>t+o.otT,0)}</td><td class="tc">${SM.reduce((t,o)=>t+o.sbT,0)}</td><td class="tc">${SM.reduce((t,o)=>t+o.total,0)}</td>`:'<td colspan="5"></td>'}</tr>`});
     h+=`</tbody></table></div>`;
   }else{
     h+=`<div class="scroll"><table class="dv"><thead><tr><th>วันที่</th>${['M','A','N'].map(s=>`<th>${SHN[s]}</th>`).join('')}</tr></thead><tbody>`;
     c.days.forEach((day,di)=>{
-      h+=`<tr class="${day.hol?'hol':''}"><td class="d">${DOW[day.dow]} ${day.d}</td>${['M','A','N'].map(s=>{const si=SH.indexOf(s),idx=di*3+si,v=V.cov[idx];
-        const regs=S.nurses.map((n,i)=>A[i][idx]===1?`<span class="nmchip">${esc(shortName(n))}</span>`:'').join('');
+      h+=`<tr class="${day.hol?'hol':''}"><td class="d">${DOW[day.dow]} ${day.d}${(()=>{const IC=S.nurses.filter(n=>!day.hol&&!isLeave(c,n.id,day.d)&&isIC(c,n.id,day.d)).map(n=>esc(shortName(n)));const L=S.nurses.filter(n=>isLeave(c,n.id,day.d)).map(n=>esc(shortName(n)));return L.length?`<br><span class="lv">ลา</span> <span class="small" style="font-weight:400">${L.join(', ')}</span>`:''+(IC.length?`<br><span class="ic">IC</span> <span class="small" style="font-weight:400">${IC.join(', ')}</span>`:'')})()}</td>${['M','A','N'].map(s=>{const si=SH.indexOf(s),idx=di*3+si,v=V.cov[idx];
+        const regs=S.nurses.map((n,i)=>A[i][idx]===1?`<span class="nmchip">${esc(shortName(n))}</span>`:A[i][idx]===3?`<span class="nmchip">${esc(shortName(n))} <small class="muted">(ทดแทน)</small></span>`:'').join('');
         const sbs=S.nurses.map((n,i)=>A[i][idx]===2?`<span class="nmchip sb">${esc(shortName(n))}</span>`:'').join('');
-        const sh=[v.r<v.nr?`ขาด ${v.nr-v.r}`:'',v.sb<v.ns?`ขาด SB ${v.ns-v.sb}`:''].filter(Boolean).join(' ');
+        const sh=[v.subH<v.subN?`ขาดผู้ทดแทน ${v.subN-v.subH}`:'',v.r<v.nr?`ขาด ${v.nr-v.r}`:'',v.sb<v.ns?`ขาด SB ${v.ns-v.sb}`:''].filter(Boolean).join(' ');
         return `<td>${regs}${sbs?'<br>'+sbs:''}${sh?` <span class="short-tag">${sh}</span>`:''}</td>`}).join('')}</tr>`});
     h+=`</tbody></table></div>`;
   }
@@ -655,26 +701,26 @@ function vSummary(c){
   const td=(v,cls='')=>`<td class="${v?cls:'z'}">${v}</td>`;
   const sp=a=>{const t=a[0]+a[1];return `<td class="${t?'':'z'}">${t}${a[1]?`<span class="sp">วันหยุด ${a[1]}</span>`:''}</td>`};
   h+=`<p class="lead">ตัวเลขเล็กใต้แต่ละช่องคือจำนวนที่ตรงกับวันหยุด ใช้แยกอัตราค่าตอบแทนได้</p><div class="bar">${exportBtns()}</div>
-  <div class="scroll"><table class="sum"><thead><tr class="grp"><th colspan="4"></th><th colspan="4">เวร OT</th><th colspan="4">เวร Standby</th></tr>
-  <tr><th>พยาบาล</th><th>รวมทุกเวร</th><th>ดึกทั้งหมด</th><th>เวรปกติ/วันทำการ</th><th>เช้า</th><th>บ่าย</th><th>ดึก</th><th>รวม OT</th><th>เช้า</th><th>บ่าย</th><th>ดึก</th><th>รวม SB</th></tr></thead><tbody>`;
-  const T={total:0,nights:0,work:0,otT:0,sbT:0,ot:{M:0,A:0,N:0},sb:{M:0,A:0,N:0}};
-  R.forEach((o,i)=>{['total','nights','work','otT','sbT'].forEach(k=>T[k]+=o[k]);SH.forEach(s=>{T.ot[s]+=o.ot[s][0]+o.ot[s][1];T.sb[s]+=o.sb[s][0]+o.sb[s][1]});
-    const wl=o.n.mode==='fixed'?'เช้าวันทำการ':o.n.mode==='quota'?`โควตา ${o.n.quota}`:'';
-    h+=`<tr><td>${i+1}. ${esc(o.n.name)}<span class="sp">${esc(modeLabel(o.n))}</span></td>${td(o.total)}${td(o.nights)}<td class="${o.work?'':'z'}">${o.work}${wl?`<span class="sp">${wl}</span>`:''}</td>${sp(o.ot.M)}${sp(o.ot.A)}${sp(o.ot.N)}${td(o.otT,'b')}${sp(o.sb.M)}${sp(o.sb.A)}${sp(o.sb.N)}${td(o.sbT,'b')}</tr>`});
-  h+=`</tbody><tfoot><tr><td>รวม</td><td>${T.total}</td><td>${T.nights}</td><td>${T.work}</td><td>${T.ot.M}</td><td>${T.ot.A}</td><td>${T.ot.N}</td><td>${T.otT}</td><td>${T.sb.M}</td><td>${T.sb.A}</td><td>${T.sb.N}</td><td>${T.sbT}</td></tr></tfoot></table></div>
-  <div class="card" style="margin-top:16px"><h3>วิธีนับ</h3><p class="small">เช้าประจำ: เวรเช้าวันจันทร์–ศุกร์ที่ไม่ใช่วันหยุดนับเป็นวันทำการ เวรปกติอื่นทั้งหมดเป็น OT · รันเวร: ${S.rules.sbInQuota?'เวรปกติและ standby':'เวรปกติ'} ${S.rules.quotaOrder==='wdM'?'นับเวรเช้าวันธรรมดาเข้าโควตาก่อน แล้วจึงนับตามลำดับวันที่':'นับเข้าโควตาตามลำดับวันที่'} ส่วนที่เกินเป็น OT · OT ทั้งหมด: เวรปกติทุกเวรเป็น OT · Standby ${S.rules.sbInQuota?'ที่ไม่ได้นับเข้าโควตา':''} แยกนับในช่อง Standby (เปลี่ยนได้ในขั้นที่ 5)</p></div>`;
+  <div class="scroll"><table class="sum"><thead><tr class="grp"><th colspan="5"></th><th colspan="4">เวร OT</th><th colspan="4">เวร Standby</th></tr>
+  <tr><th>พยาบาล</th><th>รวมทุกเวร</th><th>ดึกทั้งหมด</th><th>วันลา</th><th>เวรปกติ/วันทำการ</th><th>เช้า</th><th>บ่าย</th><th>ดึก</th><th>รวม OT</th><th>เช้า</th><th>บ่าย</th><th>ดึก</th><th>รวม SB</th></tr></thead><tbody>`;
+  const T={leave:0,total:0,nights:0,work:0,otT:0,sbT:0,ot:{M:0,A:0,N:0},sb:{M:0,A:0,N:0}};
+  R.forEach((o,i)=>{['leave','total','nights','work','otT','sbT'].forEach(k=>T[k]+=o[k]);SH.forEach(s=>{T.ot[s]+=o.ot[s][0]+o.ot[s][1];T.sb[s]+=o.sb[s][0]+o.sb[s][1]});
+    const wl=o.n.mode==='fixed'?'เช้าวันทำการ':o.n.mode==='quota'?(o.leave?`โควตา ${o.n.quota}−ลา ${o.leave} = ${o.qe}`:`โควตา ${o.qe}`):'';
+    h+=`<tr><td>${i+1}. ${esc(o.n.name)}<span class="sp">${esc(modeLabel(o.n))}</span></td>${td(o.total)}${td(o.nights)}<td class="${o.leave?'':'z'}">${o.leave}${o.icd?`<span class="sp">IC ${o.icd} วัน</span>`:''}</td><td class="${o.work?'':'z'}">${o.work}${wl?`<span class="sp">${wl}</span>`:''}${o.sub?`<span class="sp">มีเช้าทดแทน ${o.sub} เวร</span>`:''}</td>${sp(o.ot.M)}${sp(o.ot.A)}${sp(o.ot.N)}${td(o.otT,'b')}${sp(o.sb.M)}${sp(o.sb.A)}${sp(o.sb.N)}${td(o.sbT,'b')}</tr>`});
+  h+=`</tbody><tfoot><tr><td>รวม</td><td>${T.total}</td><td>${T.nights}</td><td>${T.leave}</td><td>${T.work}</td><td>${T.ot.M}</td><td>${T.ot.A}</td><td>${T.ot.N}</td><td>${T.otT}</td><td>${T.sb.M}</td><td>${T.sb.A}</td><td>${T.sb.N}</td><td>${T.sbT}</td></tr></tfoot></table></div>
+  <div class="card" style="margin-top:16px"><h3>วิธีนับ</h3><p class="small">วันลา (นับเฉพาะวันทำการ) หักออกจากเวรปกติที่ต้องทำ: เช้าประจำจะไม่มีเวรเช้าวันนั้น กลุ่มรันเวรโควตาลดลงวันละ 1 เวร เวรที่หายไปจะถูกจัดให้คนอื่นเป็น OT · เช้าประจำ: เวรเช้าวันจันทร์–ศุกร์ที่ไม่ใช่วันหยุดนับเป็นวันทำการ เวรปกติอื่นทั้งหมดเป็น OT · รันเวร: ${S.rules.sbInQuota?'เวรปกติและ standby':'เวรปกติ'} ${S.rules.quotaOrder==='wdM'?'นับเวรเช้าวันธรรมดาเข้าโควตาก่อน แล้วจึงนับตามลำดับวันที่':'นับเข้าโควตาตามลำดับวันที่'} ส่วนที่เกินเป็น OT · OT ทั้งหมด: เวรปกติทุกเวรเป็น OT · Standby ${S.rules.sbInQuota?'ที่ไม่ได้นับเข้าโควตา':''} แยกนับในช่อง Standby (เปลี่ยนได้ในขั้นที่ 5)</p></div>`;
   return h;
 }
 function vReq(c){
   if(!S.nurses.find(n=>n.id===reqNurse))reqNurse=S.nurses[0]?.id;
   const n=S.nurses.find(x=>x.id===reqNurse);
-  const cnt=id=>{const r=S.requests[c.mk]?.[id]||{};let w=0,o=0;Object.values(r).forEach(d=>SH.forEach(s=>{if(d[s]===1)w++;if(d[s]===2)o++}));return [w,o]};
-  let h=`<h2 class="pg">คำขอเวร ${MON[c.m]} ${c.y+543}</h2><p class="lead">เลือกชื่อ แล้วคลิกเวรเพื่อสลับ ว่าง → ขอไม่ขึ้น → ขอขึ้น คลิกเลขวันที่เพื่อขอไม่ขึ้นทั้งวัน "ขอไม่ขึ้น" ระบบจะไม่จัดให้แน่นอน "ขอขึ้น" ระบบจะจัดให้ก่อนถ้าไม่ขัดเงื่อนไขอื่น</p>
-  <div class="rq"><div class="nl">${S.nurses.map(x=>{const [w,o]=cnt(x.id);return `<button data-act="reqn" data-id="${x.id}" class="${x.id===reqNurse?'on':''}">${esc(x.name)}${w||o?`<span class="cnt">ขอขึ้น ${w} · ขอไม่ขึ้น ${o}</span>`:''}</button>`}).join('')}</div><div>`;
+  const cnt=id=>{const r=S.requests[c.mk]?.[id]||{};let w=0,o=0;Object.entries(r).forEach(([d,x])=>{if(isLeave(c,id,+d))return;SH.forEach(s=>{if(x[s]===1)w++;if(x[s]===2)o++})});return [w,o,leaveCount(c,id),c.days.filter(day=>!day.hol&&isIC(c,id,day.d)&&!isLeave(c,id,day.d)).length]};
+  let h=`<h2 class="pg">คำขอเวร ${MON[c.m]} ${c.y+543}</h2><p class="lead">เลือกชื่อ แล้วคลิกเวรเพื่อสลับ ว่าง → ขอไม่ขึ้น → ขอขึ้น คลิกเลขวันที่เพื่อขอไม่ขึ้นทั้งวัน "ขอไม่ขึ้น" ระบบจะไม่จัดให้แน่นอน "ขอขึ้น" ระบบจะจัดให้ก่อนถ้าไม่ขัดเงื่อนไขอื่น ปุ่ม "IC" (มีเฉพาะคนที่ตั้งผู้ทดแทนไว้) = วันไปงาน IC ระบบจะจัดคนเข้าเวรเช้าทดแทน แต่ไม่หักเวรและยังขึ้นเวรบ่าย/ดึกได้ ปุ่ม "ลา" ใต้แต่ละวัน = ลงวันลา ไม่มีเวรทั้งวัน และหักเวรปกติที่ต้องทำลง 1 เวร (ลงได้เฉพาะวันทำการ)</p>
+  <div class="rq"><div class="nl">${S.nurses.map(x=>{const [w,o,lv,ic]=cnt(x.id);return `<button data-act="reqn" data-id="${x.id}" class="${x.id===reqNurse?'on':''}">${esc(x.name)}${w||o||lv||ic?`<span class="cnt">${[lv?`ลา ${lv}`:'',ic?`IC ${ic}`:'',w?`ขอขึ้น ${w}`:'',o?`ขอไม่ขึ้น ${o}`:''].filter(Boolean).join(' · ')}</span>`:''}</button>`}).join('')}</div><div>`;
   if(!n)return h+'</div></div>';
   h+=`<div class="bar"><b>${esc(n.name)}</b><button class="btn ghost" data-act="reqclear">ล้างคำขอของคนนี้</button></div><div class="cal">${DOW.map((d,k)=>`<div class="wh ${k===0||k===6?'we':''}">${d}</div>`).join('')}`;
   for(let k=0;k<c.days[0].dow;k++)h+='<div></div>';
-  c.days.forEach(day=>{h+=`<div class="cd ${day.hol?'hol':''}"><button class="cdn" data-act="reqday" data-d="${day.d}">${day.d}</button><div class="cb">${SH.map(s=>{const v=req(c,n.id,day.d,s);return `<button class="rb v${v}" data-act="reqs" data-d="${day.d}" data-s="${s}" title="${SHN[s]}: ${['ว่าง','ขอขึ้น','ขอไม่ขึ้น'][v]}">${SHC[s]}</button>`}).join('')}</div></div>`});
+  c.days.forEach(day=>{const lvd=isLeave(c,n.id,day.d);h+=`<div class="cd ${day.hol?'hol':''} ${lvd?'leave':''}"><button class="cdn" data-act="reqday" data-d="${day.d}">${day.d}</button><div class="cb">${SH.map(s=>{const v=req(c,n.id,day.d,s);return `<button class="rb v${v}" data-act="reqs" data-d="${day.d}" data-s="${s}" title="${SHN[s]}: ${['ว่าง','ขอขึ้น','ขอไม่ขึ้น'][v]}">${SHC[s]}</button>`}).join('')}</div>${day.hol?'':`<button class="lvb ${lvd?'on':''}" data-act="leave" data-d="${day.d}">${lvd?'ลา ✓':'ลา'}</button>`}${day.hol||!hasSub(n)||lvd?'':`<button class="icb ${isIC(c,n.id,day.d)?'on':''}" data-act="ic" data-d="${day.d}">${isIC(c,n.id,day.d)?'IC ✓':'IC'}</button>`}</div>`});
   return h+`</div></div></div>`;
 }
 function vNurses(){
@@ -682,17 +728,20 @@ function vNurses(){
   let h=`<h2 class="pg">พยาบาลและเงื่อนไข</h2><p class="lead">ปุ่มที่เปิดในตาราง คือเวรที่คนนั้นขึ้นได้ในแต่ละวันของสัปดาห์ "ปกติ" = เวรปกติ "SB" = standby ช่องจำนวนสูงสุดที่เว้นว่างไว้ หมายถึงไม่จำกัด</p>
   <div class="bar"><button class="btn" data-act="addn">เพิ่มพยาบาล</button><button class="btn ghost" data-act="reset">คืนค่าเริ่มต้นทั้งหมด</button></div>`;
   NS.forEach((n,i)=>{
-    h+=`<details class="nc" data-id="${n.id}" ${openCards.has(n.id)?'open':''}><summary><b>${i+1}. ${esc(n.name)}${n.nick?` (${esc(n.nick)})`:''}</b><span class="small muted">${esc(modeLabel(n))}${+n.maxReg?` · ปกติไม่เกิน ${n.maxReg}`:''}${+n.maxSb?` · SB ไม่เกิน ${n.maxSb}`:''}${+n.maxShifts?` · รวมไม่เกิน ${n.maxShifts}`:''}${+n.maxNight?` · ดึกไม่เกิน ${n.maxNight}`:''}</span></summary><div class="ncb">
+    h+=`<details class="nc" data-id="${n.id}" ${openCards.has(n.id)?'open':''}><summary><b>${i+1}. ${esc(n.name)}${n.nick?` (${esc(n.nick)})`:''}</b><span class="small muted">${esc(modeLabel(n))}${+n.maxReg?` · ปกติไม่เกิน ${n.maxReg}`:''}${+n.maxSb?` · SB ไม่เกิน ${n.maxSb}`:''}${+n.maxSbWeek?` · SB ไม่เกิน ${n.maxSbWeek}/สัปดาห์`:''}${+n.maxShifts?` · รวมไม่เกิน ${n.maxShifts}`:''}${+n.maxNight?` · ดึกไม่เกิน ${n.maxNight}`:''}</span></summary><div class="ncb">
     <div class="f"><label>ชื่อ-สกุล<input class="w" data-f="name" data-id="${n.id}" value="${esc(n.name)}"></label>
       <label>ชื่อเล่น (แสดงในมุมมองรายวัน)<input data-f="nick" data-id="${n.id}" value="${esc(n.nick)}"></label>
       <label>วิธีนับเวร<select data-f="mode" data-id="${n.id}"><option value="quota" ${n.mode==='quota'?'selected':''}>รันเวร มีโควตาเวรปกติ</option><option value="fixed" ${n.mode==='fixed'?'selected':''}>เช้าวันธรรมดาประจำ + OT</option><option value="ot" ${n.mode==='ot'?'selected':''}>OT ทั้งหมด</option></select></label>
       ${n.mode==='quota'?`<label>โควตาเวรปกติ<input type="number" min="0" data-f="quota" data-id="${n.id}" value="${n.quota}"></label>`:''}
       <label>เวรปกติสูงสุด/เดือน${n.mode==='fixed'?' (ไม่รวมเช้าประจำ)':''}<input type="number" min="0" data-f="maxReg" data-id="${n.id}" value="${n.maxReg||''}" placeholder="ไม่จำกัด"></label>
       <label>Standby สูงสุด/เดือน<input type="number" min="0" data-f="maxSb" data-id="${n.id}" value="${n.maxSb||''}" placeholder="ไม่จำกัด"></label>
+      <label>Standby สูงสุด/สัปดาห์ (จ–อา)<input type="number" min="0" data-f="maxSbWeek" data-id="${n.id}" value="${n.maxSbWeek||''}" placeholder="ไม่จำกัด"></label>
       <label>รวมทุกเวรสูงสุด/เดือน${n.mode==='fixed'?' (ไม่รวมเช้าประจำ)':''}<input type="number" min="0" data-f="maxShifts" data-id="${n.id}" value="${n.maxShifts||''}" placeholder="ไม่จำกัด"></label>
       <label>เวรดึกสูงสุด/เดือน<input type="number" min="0" data-f="maxNight" data-id="${n.id}" value="${n.maxNight||''}" placeholder="ไม่จำกัด"></label></div>
-    <div class="scroll" style="display:inline-block;max-width:100%"><table class="al"><thead><tr><th>วัน</th>${SH.map(s=>`<th>${SHN[s]}</th>`).join('')}</tr></thead><tbody>${ROWS.map(r=>`<tr><th>${ROWN[r]}</th>${SH.map(s=>{const a=n.allow[r][s];return `<td><button class="tg ${a[0]?'on':''}" data-act="al" data-id="${n.id}" data-r="${r}" data-s="${s}" data-k="0">ปกติ</button><button class="tg sb ${a[1]?'on':''}" data-act="al" data-id="${n.id}" data-r="${r}" data-s="${s}" data-k="1">SB</button></td>`}).join('')}</tr>`).join('')}</tbody></table></div>
+    <div class="scroll" style="display:inline-block;max-width:100%"><table class="al"><thead><tr><th>วัน</th>${SH.map(s=>`<th>${SHN[s]}</th>`).join('')}</tr></thead><tbody>${ROWS.map(r=>`<tr><th>${ROWN[r]}</th>${SH.map(s=>{const a=n.allow[r][s];return `<td><button class="tg ${a[0]?'on':''}" data-act="al" data-id="${n.id}" data-r="${r}" data-s="${s}" data-k="0">ปกติ</button><button class="tg sb ${a[1]?'on':''}" data-act="al" data-id="${n.id}" data-r="${r}" data-s="${s}" data-k="1">SB</button>${r==='ph'?'':`<button class="tg pin ${n.standing&&n.standing[r]&&n.standing[r][s]?'on':''}" data-act="pin" data-id="${n.id}" data-r="${r}" data-s="${s}">ประจำ</button>`}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="note">"ประจำ" = จัดเวรปกตินี้ให้ทุกสัปดาห์โดยอัตโนมัติ (รวมวันนั้นที่ตรงวันหยุด) ยกเว้นวันที่ลาหรือขอไม่ขึ้น</p>
     ${n.mode==='fixed'?'<p class="note">เวรเช้าวันจันทร์–ศุกร์ที่ไม่ใช่วันหยุดจะถูกใส่ให้อัตโนมัติ เว้นแต่ขอไม่ขึ้นหรือปิดปุ่ม "ปกติ" ของเช้าวันนั้น</p>':''}
+    <div class="row small" style="margin-top:12px">ถ้าคนนี้ลาหรือไปงาน IC ในวันทำการ ต้องมีคนเข้าเวรเช้าทดแทน 1 คน จาก: ${NS.filter(x=>x.id!==n.id).map(x=>`<button class="tg ${(n.subPool||[]).includes(x.id)?'on':''}" data-act="sp" data-id="${n.id}" data-x="${x.id}">${esc(shortName(x))}</button>`).join('')}${(n.subPool||[]).length?'':'<span class="muted">(ไม่ต้องมีคนทดแทน)</span>'}</div>
     <div class="row"><button class="btn ghost" data-act="up" data-id="${n.id}">เลื่อนขึ้น</button><button class="btn ghost" data-act="deln" data-id="${n.id}">ลบพยาบาลคนนี้</button></div></div></details>`;
   });
   h+=`<div class="savebar" id="nbar" ${draft?'':'hidden'}><b>มีการแก้ไขที่ยังไม่บันทึก</b><button class="btn" data-act="ncancel">ยกเลิกการแก้ไข</button><button class="btn pri" data-act="nsave">บันทึก</button></div>`;
@@ -708,6 +757,8 @@ function vStaff(c){
    <label>ความละเอียดในการจัด<select data-rule="effort"><option value="1" ${+r.effort===1?'selected':''}>เร็ว</option><option value="2" ${+r.effort===2?'selected':''}>ปกติ</option><option value="3" ${+r.effort===3?'selected':''}>ละเอียด (ช้ากว่า)</option></select></label>
    <label>นับโควตาเวรปกติของกลุ่มรันเวร<select data-rule="quotaOrder"><option value="date" ${r.quotaOrder==='date'?'selected':''}>ตามลำดับวันที่</option><option value="wdM" ${r.quotaOrder==='wdM'?'selected':''}>เช้าวันธรรมดาก่อน แล้วตามวันที่</option></select></label></div>
    <label class="chk"><input type="checkbox" data-rule="forbidNMA" ${r.forbidNMA?'checked':''}><span>ห้ามจัด ดึก-เช้า-บ่าย ในวันเดียวกัน</span></label>
+   <label class="chk"><input type="checkbox" data-rule="noSbBeforeMax" ${r.noSbBeforeMax!==false?'checked':''}><span>เวรปกติติดกันครบจำนวนสูงสุด (เช่น ช บ ด) ต้องไม่มีเวรใดอยู่ก่อนหน้า แม้เป็น standby (เช่น ห้ามมี ด วันเดียวกับ ช บ)</span></label>
+   <label class="chk"><input type="checkbox" data-rule="leaveGap" ${r.leaveGap!==false?'checked':''}><span>ไม่จัดเวรบ่ายวันก่อนวันลา และเวรดึกวันหลังวันลา (ทั้งเวรปกติและ standby)</span></label>
    <label class="chk"><input type="checkbox" data-rule="fixedCount" ${r.fixedCount?'checked':''}><span>นับพยาบาลเช้าประจำรวมในอัตรากำลังเวรเช้า</span></label>
    <label class="chk"><input type="checkbox" data-rule="sbInQuota" ${r.sbInQuota?'checked':''}><span>นับเวร standby รวมในโควตาของกลุ่มรันเวร</span></label>
    <label class="chk"><input type="checkbox" data-rule="carry" ${r.carry?'checked':''}><span>ใช้เวร 2 วันสุดท้ายของเดือนก่อนในการตรวจเวรติดกัน (ถ้ามีตารางเดือนก่อนในโปรแกรม)</span></label>
@@ -721,12 +772,12 @@ function openCell(i,di){
   const c=ctx(),n=S.nurses[i],day=c.days[di],A=getA(c);if(!A)return;
   const V=validate(c,A),lk=(S.locks[c.mk]||{})[n.id]||{};
   const msgs=SH.flatMap((s,si)=>V.cell[i+':'+(di*3+si)]||[]);
-  const rqs=SH.map(s=>{const v=req(c,n.id,day.d,s);return v?`${SHN[s]} ${v===1?'ขอขึ้น':'ขอไม่ขึ้น'}`:''}).filter(Boolean);
+  const lvd=isLeave(c,n.id,day.d);const rqs=lvd?['วันลา']:SH.map(s=>{const v=req(c,n.id,day.d,s);return v?`${SHN[s]} ${v===1?'ขอขึ้น':'ขอไม่ขึ้น'}`:''}).filter(Boolean);
   const isL=SH.some((s,si)=>(di*3+si) in lk);
   document.getElementById('modal').innerHTML=`<div class="modal" data-act="mclose"><div class="mbox" role="dialog" aria-modal="true"><h3>${esc(n.name)}</h3><div class="small muted">วัน${DOWF[day.dow]}ที่ ${day.d} ${MON[c.m]}${day.hol?' (วันหยุด)':''}</div>
-  ${SH.map((s,si)=>{const v=A[i][di*3+si];return `<div class="srow"><b>${SHN[s]}</b><div class="seg">${['ว่าง','ปกติ','Standby'].map((l,k)=>`<button class="${v===k?'on':''}" data-act="setc" data-i="${i}" data-di="${di}" data-si="${si}" data-v="${k}">${l}</button>`).join('')}</div></div>`}).join('')}
+  ${SH.map((s,si)=>{const v=A[i][di*3+si],sr=subReqs(c)[di*3+si]||[],canSub=v===3||sr.some(q=>q.pool.includes(n.id));return `<div class="srow"><b>${SHN[s]}</b><div class="seg">${['ว่าง','ปกติ','Standby',...(canSub?['ทดแทน']:[])].map((l,k)=>`<button class="${v===k?'on':''}" data-act="setc" data-i="${i}" data-di="${di}" data-si="${si}" data-v="${k}">${l}</button>`).join('')}</div></div>`}).join('')}
   ${rqs.length?`<p class="small">คำขอ: ${rqs.join(', ')}</p>`:''}${msgs.length?`<p class="small" style="color:var(--warn)">${[...new Set(msgs)].map(esc).join('<br>')}</p>`:''}
-  <div class="row" style="justify-content:space-between">${isL?`<button class="btn ghost" data-act="unlockday" data-i="${i}" data-di="${di}">ปลดล็อกวันนี้</button>`:'<span class="small muted">แก้แล้วจะล็อกวันนี้อัตโนมัติ</span>'}<button class="btn pri" data-act="mclose2">เสร็จ</button></div></div></div>`;
+  ${day.hol?'':`<div class="row"><button class="btn ${lvd?'danger':'ghost'}" data-act="leavecell" data-i="${i}" data-di="${di}">${lvd?'ยกเลิกวันลา':'ลงวันลาวันนี้'}</button>${hasSub(n)&&!lvd?`<button class="btn ${isIC(c,n.id,day.d)?'pri':'ghost'}" data-act="iccell" data-i="${i}" data-di="${di}">${isIC(c,n.id,day.d)?'ยกเลิกวัน IC':'วันนี้ไปงาน IC'}</button>`:''}</div>`}<div class="row" style="justify-content:space-between">${isL?`<button class="btn ghost" data-act="unlockday" data-i="${i}" data-di="${di}">ปลดล็อกวันนี้</button>`:'<span class="small muted">แก้แล้วจะล็อกวันนี้อัตโนมัติ</span>'}<button class="btn pri" data-act="mclose2">เสร็จ</button></div></div></div>`;
 }
 
 /* ================= export ================= */
@@ -735,33 +786,33 @@ async function saveFile(filename,data,mime){
   try{const b=data instanceof Blob?data:new Blob([data],{type:mime||'text/html'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
   catch(e){toast('เบราว์เซอร์นี้ไม่อนุญาตให้บันทึกไฟล์ ลองเปิดผ่านลิงก์ claude.ai')}
 }
-const cellText=(Ai,di)=>SH.map((s,si)=>{const v=Ai[di*3+si];return v===1?SHC[s]:v===2?SHC[s]+'(S)':''}).filter(Boolean).join(' ');
+const cellText=(Ai,di)=>SH.map((s,si)=>{const v=Ai[di*3+si];return v===1?SHC[s]:v===3?SHC[s]+'(ทดแทน)':v===2?SHC[s]+'(S)':''}).filter(Boolean).join(' ');
 function exportXlsx(){
   if(!window.XLSX){toast('โหลดตัวสร้างไฟล์ Excel ไม่สำเร็จ ลองเปิดหน้าใหม่');return}
   const c=ctx(),A=getA(c);if(!A){toast('ยังไม่มีตารางเวรเดือนนี้');return}
   const V=validate(c,A),R=summarize(c,A),title=`ตารางเวรพยาบาล หอผู้ป่วยใน ประจำเดือน${MON[c.m]} ${c.y+543}`;
   const wb=XLSX.utils.book_new();
-  const a1=[[title],[],['พยาบาล',...c.days.map(d=>d.d),'เวรปกติ/วันทำการ','OT','Standby','รวม'],['',...c.days.map(d=>DOW[d.dow]+(d.hol?'*':'')),'','','','']];
+  const a1=[[title],[],['พยาบาล',...c.days.map(d=>d.d),'วันลา','เวรปกติ/วันทำการ','OT','Standby','รวม'],['',...c.days.map(d=>DOW[d.dow]+(d.hol?'*':'')),'','','','','']];
   const LM=labMaps(c,A);
-  S.nurses.forEach((n,i)=>a1.push([`${i+1}. ${n.name}`,...c.days.map((d,di)=>SH.map((s,si)=>{const idx=di*3+si,v=A[i][idx];return v===1?SHC[s]+(LM[i][idx]==='OT'?'(OT)':''):v===2?SHC[s]+'(S)':''}).filter(Boolean).join(' ')),workLabel(R[i]),R[i].otT,R[i].sbT,R[i].total]));
+  S.nurses.forEach((n,i)=>a1.push([`${i+1}. ${n.name}`,...c.days.map((d,di)=>[isLeave(c,n.id,d.d)?'ลา':(!d.hol&&isIC(c,n.id,d.d)?'IC':''),...SH.map((s,si)=>{const idx=di*3+si,v=A[i][idx];return v===1?SHC[s]+(LM[i][idx]==='OT'?'(OT)':''):v===3?SHC[s]+'(ทดแทน'+(LM[i][idx]==='OT'?',OT':'')+')':v===2?SHC[s]+'(S)':''})].filter(Boolean).join(' ')),R[i].leave,workLabel(R[i]),R[i].otT,R[i].sbT,R[i].total]));
   a1.push([]);
   ['M','A','N'].forEach(s=>{const si=SH.indexOf(s);
     a1.push([`${SHN[s]} ปกติ มี/ต้องการ`,...c.days.map((d,di)=>{const v=V.cov[di*3+si];return `${v.r}/${v.nr}`})]);
     a1.push([`${SHN[s]} standby มี/ต้องการ`,...c.days.map((d,di)=>{const v=V.cov[di*3+si];return v.ns?`${v.sb}/${v.ns}`:'-'})])});
   a1.push([],['ด = ดึก  ช = เช้า  บ = บ่าย  (OT) = เวรปกติที่นับเป็น OT  (S) = standby  * = วันหยุด']);
-  const w1=XLSX.utils.aoa_to_sheet(a1);w1['!cols']=[{wch:26},...c.days.map(()=>({wch:8})),{wch:14},{wch:6},{wch:8},{wch:6}];
+  const w1=XLSX.utils.aoa_to_sheet(a1);w1['!cols']=[{wch:26},...c.days.map(()=>({wch:8})),{wch:7},{wch:14},{wch:6},{wch:8},{wch:6}];
   XLSX.utils.book_append_sheet(wb,w1,'ตารางเวรรายคน');
-  const a2=[[title],[],['วันที่','วัน','วันหยุด','เช้า','บ่าย','บ่าย standby','ดึก','ดึก standby','เช้า standby']];
+  const a2=[[title],[],['วันที่','วัน','วันหยุด','เช้า','บ่าย','บ่าย standby','ดึก','ดึก standby','เช้า standby','เช้าทดแทนคนลา']];
   const names=(idx,t)=>S.nurses.map((n,i)=>A[i][idx]===t?shortName(n):'').filter(Boolean).join(', ');
-  c.days.forEach((d,di)=>a2.push([d.d,DOWF[d.dow],d.hol?'หยุด':'',names(di*3+1,1),names(di*3+2,1),names(di*3+2,2),names(di*3,1),names(di*3,2),names(di*3+1,2)]));
-  const w2=XLSX.utils.aoa_to_sheet(a2);w2['!cols']=[{wch:6},{wch:10},{wch:7},{wch:34},{wch:22},{wch:14},{wch:22},{wch:14},{wch:14}];
+  c.days.forEach((d,di)=>a2.push([d.d,DOWF[d.dow],d.hol?'หยุด':'',names(di*3+1,1),names(di*3+2,1),names(di*3+2,2),names(di*3,1),names(di*3,2),names(di*3+1,2),names(di*3+1,3)]));
+  const w2=XLSX.utils.aoa_to_sheet(a2);w2['!cols']=[{wch:6},{wch:10},{wch:7},{wch:34},{wch:22},{wch:14},{wch:22},{wch:14},{wch:14},{wch:16}];
   XLSX.utils.book_append_sheet(wb,w2,'ตารางเวรรายวัน');
   const a3=[[`สรุปเวรและ OT ประจำเดือน${MON[c.m]} ${c.y+543}`],[],
-    ['ลำดับ','พยาบาล','วิธีนับ','รวมทุกเวร','ดึกทั้งหมด','เวรปกติ/วันทำการ',
-     'OT เช้า วันธรรมดา','OT เช้า วันหยุด','OT บ่าย วันธรรมดา','OT บ่าย วันหยุด','OT ดึก วันธรรมดา','OT ดึก วันหยุด','รวม OT',
+    ['ลำดับ','พยาบาล','วิธีนับ','รวมทุกเวร','ดึกทั้งหมด','วันลา','วัน IC','โควตาหลังหักลา','เวรปกติ/วันทำการ',
+     'OT เช้า วันธรรมดา','OT เช้า วันหยุด','OT บ่าย วันธรรมดา','OT บ่าย วันหยุด','OT ดึก วันธรรมดา','OT ดึก วันหยุด','รวม OT','เวรเช้าทดแทน (รวมอยู่ในเวรด้านซ้าย)',
      'SB เช้า วันธรรมดา','SB เช้า วันหยุด','SB บ่าย วันธรรมดา','SB บ่าย วันหยุด','SB ดึก วันธรรมดา','SB ดึก วันหยุด','รวม SB']];
-  R.forEach((o,i)=>a3.push([i+1,o.n.name,modeLabel(o.n),o.total,o.nights,o.work,o.ot.M[0],o.ot.M[1],o.ot.A[0],o.ot.A[1],o.ot.N[0],o.ot.N[1],o.otT,o.sb.M[0],o.sb.M[1],o.sb.A[0],o.sb.A[1],o.sb.N[0],o.sb.N[1],o.sbT]));
-  const w3=XLSX.utils.aoa_to_sheet(a3);w3['!cols']=[{wch:6},{wch:24},{wch:30},...Array(17).fill({wch:10})];
+  R.forEach((o,i)=>a3.push([i+1,o.n.name,modeLabel(o.n),o.total,o.nights,o.leave,o.icd,o.n.mode==='quota'?o.qe:'',o.work,o.ot.M[0],o.ot.M[1],o.ot.A[0],o.ot.A[1],o.ot.N[0],o.ot.N[1],o.otT,o.sub,o.sb.M[0],o.sb.M[1],o.sb.A[0],o.sb.A[1],o.sb.N[0],o.sb.N[1],o.sbT]));
+  const w3=XLSX.utils.aoa_to_sheet(a3);w3['!cols']=[{wch:6},{wch:24},{wch:30},...Array(21).fill({wch:10})];
   XLSX.utils.book_append_sheet(wb,w3,'สรุป OT');
   const a4=[['วันที่','วัน','วันหยุด','เวร','ประเภท','พยาบาล','การนับ']];const rows=[];
   S.nurses.forEach((n,i)=>classify(c,A,i).forEach(x=>rows.push([x.di,SH.indexOf(x.s),[`${x.day.d}/${c.m+1}/${c.y+543}`,DOW[x.day.dow],x.hol?'หยุด':'',SHN[x.s],x.v===1?'ปกติ':'Standby',n.name,x.lab==='WORK'?'เวรปกติ/วันทำการ':x.lab==='OT'?'OT':'Standby']])));
@@ -774,16 +825,16 @@ function exportXlsx(){
 function exportPrint(){
   const c=ctx(),A=getA(c);if(!A){toast('ยังไม่มีตารางเวรเดือนนี้');return}const R=summarize(c,A);
   const col={N:'#3F3A8F',M:'#AD6800',A:'#0B7675'};
-  const LM=labMaps(c,A);const cell=(Ai,di,i)=>SH.map((s,si)=>{const v=Ai[di*3+si];return v===1?`<b style="color:${col[s]}${LM[i][di*3+si]==='OT'?';border:1.5px solid #111;padding:0 2px':''}">${SHC[s]}</b>`:v===2?`<span style="color:${col[s]};border:1px dashed ${col[s]};padding:0 2px">${SHC[s]}</span>`:''}).filter(Boolean).join('<br>');
+  const LM=labMaps(c,A);const cell=(Ai,di,i)=>SH.map((s,si)=>{const v=Ai[di*3+si];return isR(v)?`<b style="color:${col[s]}${LM[i][di*3+si]==='OT'?';border:1.5px solid #111;padding:0 2px':''}">${SHC[s]}${v===3?'ท':''}</b>`:v===2?`<span style="color:${col[s]};border:1px dashed ${col[s]};padding:0 2px">${SHC[s]}</span>`:''}).filter(Boolean).join('<br>');
   const names=(idx,t)=>S.nurses.map((n,i)=>A[i][idx]===t?esc(shortName(n)):'').filter(Boolean).join(', ');
   const h=`<!doctype html><html lang="th"><head><meta charset="utf-8"><title>ตารางเวร ${MON[c.m]} ${c.y+543}</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:"Sarabun","TH SarabunPSK","Noto Sans Thai",Tahoma,sans-serif;font-size:11px;color:#111}h1{font-size:16px;margin:0 0 6px}h2{font-size:13px;margin:14px 0 4px}table{border-collapse:collapse;width:100%;margin-bottom:10px}th,td{border:1px solid #999;padding:2px 3px;text-align:center}.n{text-align:left;white-space:nowrap}.h{background:#fbe3e4}.pb{page-break-before:always}.sg{margin-top:30px;display:flex;justify-content:space-around}</style></head><body>
   <h1>ตารางเวรพยาบาล หอผู้ป่วยใน ประจำเดือน${MON[c.m]} ${c.y+543}</h1>
-  <table><tr><th class="n">พยาบาล</th>${c.days.map(d=>`<th class="${d.hol?'h':''}">${d.d}<br>${DOW[d.dow]}</th>`).join('')}<th>ปกติ</th><th>OT</th><th>SB</th><th>รวม</th></tr>
-  ${S.nurses.map((n,i)=>`<tr><td class="n">${i+1}. ${esc(n.name)}</td>${c.days.map((d,di)=>`<td class="${d.hol?'h':''}">${cell(A[i],di,i)}</td>`).join('')}<td>${workLabel(R[i])}</td><td><b>${R[i].otT}</b></td><td>${R[i].sbT}</td><td>${R[i].total}</td></tr>`).join('')}</table>
-  <div>ด = ดึก ช = เช้า บ = บ่าย ตัวในกรอบทึบ = เวรปกติที่นับเป็น OT ตัวในกรอบเส้นประ = standby ช่องสีชมพู = วันหยุด</div>
+  <table><tr><th class="n">พยาบาล</th>${c.days.map(d=>`<th class="${d.hol?'h':''}">${d.d}<br>${DOW[d.dow]}</th>`).join('')}<th>ลา</th><th>ปกติ</th><th>OT</th><th>SB</th><th>รวม</th></tr>
+  ${S.nurses.map((n,i)=>`<tr><td class="n">${i+1}. ${esc(n.name)}</td>${c.days.map((d,di)=>`<td class="${d.hol?'h':''}">${isLeave(c,n.id,d.d)?'<b style="color:#B42318">ลา</b><br>':!d.hol&&isIC(c,n.id,d.d)?'<b style="color:#0F5C8C">IC</b><br>':''}${cell(A[i],di,i)}</td>`).join('')}<td>${R[i].leave||''}</td><td>${workLabel(R[i])}</td><td><b>${R[i].otT}</b></td><td>${R[i].sbT}</td><td>${R[i].total}</td></tr>`).join('')}</table>
+  <div>ด = ดึก ช = เช้า บ = บ่าย ชท = เช้าทดแทนคนลา ตัวในกรอบทึบ = เวรปกติที่นับเป็น OT ตัวในกรอบเส้นประ = standby ช่องสีชมพู = วันหยุด</div>
   <div class="sg"><span>ผู้จัดตารางเวร ..............................</span><span>หัวหน้าหอผู้ป่วย ..............................</span><span>ผู้อนุมัติ ..............................</span></div>
   <h2 class="pb">ตารางเวรรายวัน</h2><table><tr><th>วันที่</th><th>เช้า</th><th>บ่าย</th><th>ดึก</th><th>Standby</th></tr>
-  ${c.days.map((d,di)=>`<tr class="${d.hol?'h':''}"><td class="n">${DOW[d.dow]} ${d.d}</td><td class="n">${names(di*3+1,1)}</td><td class="n">${names(di*3+2,1)}</td><td class="n">${names(di*3,1)}</td><td class="n">${[['ช',di*3+1],['บ',di*3+2],['ด',di*3]].map(([l,ix])=>{const x=names(ix,2);return x?l+': '+x:''}).filter(Boolean).join(' / ')}</td></tr>`).join('')}</table>
+  ${c.days.map((d,di)=>`<tr class="${d.hol?'h':''}"><td class="n">${DOW[d.dow]} ${d.d}</td><td class="n">${names(di*3+1,1)}${names(di*3+1,3)?' + ทดแทน: '+names(di*3+1,3):''}</td><td class="n">${names(di*3+2,1)}</td><td class="n">${names(di*3,1)}</td><td class="n">${[['ช',di*3+1],['บ',di*3+2],['ด',di*3]].map(([l,ix])=>{const x=names(ix,2);return x?l+': '+x:''}).filter(Boolean).join(' / ')}</td></tr>`).join('')}</table>
   <h2>สรุปเวรและ OT</h2><table><tr><th class="n">พยาบาล</th><th>รวม</th><th>ปกติ/ทำการ</th><th>OT ช</th><th>OT บ</th><th>OT ด</th><th>รวม OT</th><th>SB ช</th><th>SB บ</th><th>SB ด</th><th>รวม SB</th></tr>
   ${R.map((o,i)=>`<tr><td class="n">${i+1}. ${esc(o.n.name)}</td><td>${o.total}</td><td>${o.work}</td>${['M','A','N'].map(s=>`<td>${o.ot[s][0]+o.ot[s][1]}</td>`).join('')}<td><b>${o.otT}</b></td>${['M','A','N'].map(s=>`<td>${o.sb[s][0]+o.sb[s][1]}</td>`).join('')}<td><b>${o.sbT}</b></td></tr>`).join('')}</table>
   </body></html>`;
@@ -792,7 +843,7 @@ function exportPrint(){
 
 /* ================= events ================= */
 const D=()=>draft||(draft=JSON.parse(JSON.stringify(S.nurses)));
-function setField(t){const n=D().find(x=>x.id===t.dataset.id),f=t.dataset.f;if(!n)return;n[f]=['quota','maxShifts','maxReg','maxSb','maxNight'].includes(f)?(+t.value||0):t.value}
+function setField(t){const n=D().find(x=>x.id===t.dataset.id),f=t.dataset.f;if(!n)return;n[f]=['quota','maxShifts','maxReg','maxSb','maxSbWeek','maxNight'].includes(f)?(+t.value||0):t.value}
 document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.f&&t.tagName==='INPUT'){setField(t);const b=document.getElementById('nbar');if(b)b.hidden=false}});
 async function saveNurses(){
   if(!draft&&!(BK&&!dbRO)){toast('ไม่มีการแก้ไขที่ต้องบันทึก');return}
@@ -826,12 +877,18 @@ document.addEventListener('click',e=>{
     case 'unlockday':{const i=+t.dataset.i,di=+t.dataset.di,o=S.locks[c.mk]?.[S.nurses[i].id];if(o)SH.forEach((s,si)=>delete o[di*3+si]);save();render();openCell(i,di);return}
     case 'mclose':case 'mclose2':document.getElementById('modal').innerHTML='';return;
     case 'reqn':reqNurse=t.dataset.id;break;
-    case 'reqs':case 'reqday':{const R=S.requests[c.mk]=S.requests[c.mk]||{},P=R[reqNurse]=R[reqNurse]||{},d=t.dataset.d,D=P[d]=P[d]||{};
+    case 'ic':{const L=S.ic[c.mk]=S.ic[c.mk]||{},P=L[reqNurse]=L[reqNurse]||{},d=t.dataset.d;if(P[d])delete P[d];else P[d]=1;save();break}
+    case 'iccell':{const nid=S.nurses[+t.dataset.i].id,d=c.days[+t.dataset.di].d,L=S.ic[c.mk]=S.ic[c.mk]||{},P=L[nid]=L[nid]||{};if(P[d])delete P[d];else P[d]=1;save();render();openCell(+t.dataset.i,+t.dataset.di);return}
+    case 'leave':{const L=S.leaves[c.mk]=S.leaves[c.mk]||{},P=L[reqNurse]=L[reqNurse]||{},d=t.dataset.d;if(P[d])delete P[d];else P[d]=1;save();break}
+    case 'leavecell':{const nid=S.nurses[+t.dataset.i].id,d=c.days[+t.dataset.di].d,L=S.leaves[c.mk]=S.leaves[c.mk]||{},P=L[nid]=L[nid]||{};if(P[d])delete P[d];else P[d]=1;save();render();openCell(+t.dataset.i,+t.dataset.di);return}
+    case 'reqs':case 'reqday':{if(isLeave(c,reqNurse,+t.dataset.d)){toast('วันนี้ลงวันลาไว้ ยกเลิกวันลาก่อนจึงจะแก้คำขอได้');return}const R=S.requests[c.mk]=S.requests[c.mk]||{},P=R[reqNurse]=R[reqNurse]||{},d=t.dataset.d,D=P[d]=P[d]||{};
       if(a==='reqs'){const s=t.dataset.s,v=D[s]||0;D[s]=v===0?2:v===2?1:0}else{const allOff=SH.every(s=>D[s]===2);SH.forEach(s=>D[s]=allOff?0:2)}
       save();break}
     case 'reqclear':if(S.requests[c.mk])delete S.requests[c.mk][reqNurse];save();break;
+    case 'sp':{const n=D().find(x=>x.id===t.dataset.id),x=t.dataset.x;n.subPool=(n.subPool||[]).includes(x)?n.subPool.filter(y=>y!==x):[...(n.subPool||[]),x];break}
+    case 'pin':{const n=D().find(x=>x.id===t.dataset.id),r=t.dataset.r,s=t.dataset.s;n.standing=n.standing||{};n.standing[r]=n.standing[r]||{};if(n.standing[r][s])delete n.standing[r][s];else n.standing[r][s]=1;break}
     case 'al':{const n=D().find(x=>x.id===t.dataset.id),k=+t.dataset.k;n.allow[t.dataset.r][t.dataset.s][k]=!n.allow[t.dataset.r][t.dataset.s][k];break}
-    case 'addn':{const id='n'+Date.now().toString(36);D().push({id,name:'พยาบาลใหม่',nick:'',mode:'quota',quota:20,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,allow:mkAllow(()=>[1,1])});openCards.add(id);break}
+    case 'addn':{const id='n'+Date.now().toString(36);D().push({id,name:'พยาบาลใหม่',nick:'',mode:'quota',quota:20,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,subPool:[],allow:mkAllow(()=>[1,1])});openCards.add(id);break}
     case 'deln':{const n=D().find(x=>x.id===t.dataset.id);ask(`ลบ ${n.name} ออกจากรายชื่อ? (มีผลเมื่อกดบันทึก)`,'ลบพยาบาล',()=>{draft=D().filter(x=>x.id!==n.id);openCards.delete(n.id)});return}
     case 'ncancel':draft=null;toast('ยกเลิกการแก้ไขแล้ว');break;
     case 'nsave':saveNurses();return;
@@ -839,7 +896,7 @@ document.addEventListener('click',e=>{
     case 'gasoff':gasOff();return;
     case 'backup':{const c2=ctx();saveFile(`สำรองข้อมูลจัดเวร_IPD_${c2.y+543}-${pad(c2.m+1)}.json`,JSON.stringify(S),'application/json');return}
     case 'up':{const N=D(),i=N.findIndex(x=>x.id===t.dataset.id);if(i>0)[N[i-1],N[i]]=[N[i],N[i-1]];break}
-    case 'reset':ask('คืนค่าเริ่มต้นทั้งหมด? รายชื่อ เงื่อนไข คำขอ และตารางเวรทุกเดือนจะถูกลบ','คืนค่าเริ่มต้น',()=>{const old=[...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks)];draft=null;S=defaults();old.forEach(m=>dirty.add(m));save()});return;
+    case 'reset':ask('คืนค่าเริ่มต้นทั้งหมด? รายชื่อ เงื่อนไข คำขอ และตารางเวรทุกเดือนจะถูกลบ','คืนค่าเริ่มต้น',()=>{const old=[...Object.keys(S.ic||{}),...Object.keys(S.leaves||{}),...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks)];draft=null;S=defaults();normalize();old.forEach(m=>dirty.add(m));save()});return;
     case 'gm':{const g=S.groups[+t.dataset.g],id=t.dataset.id;g.members=g.members.includes(id)?g.members.filter(x=>x!==id):[...g.members,id];save();break}
     case 'gs':{const g=S.groups[+t.dataset.g],s=t.dataset.s;g.shifts=g.shifts.includes(s)?g.shifts.filter(x=>x!==s):[...g.shifts,s];save();break}
     case 'gdel':S.groups.splice(+t.dataset.g,1);save();break;
@@ -862,9 +919,9 @@ document.addEventListener('change',e=>{const t=e.target;if(t.id!=='restore'||!t.
   rd.onload=()=>{let o;try{o=JSON.parse(rd.result)}catch(err){toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองข้อมูลของโปรแกรม');return}
     if(!o||o.v!==3||!Array.isArray(o.nurses)){toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองข้อมูลของโปรแกรมฉบับนี้');return}
     ask(`นำเข้าข้อมูลจาก ${f.name}? ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่`,'นำเข้า',()=>{
-      const old=[...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks)];
-      S=Object.assign(defaults(),o);draft=null;reqNurse=S.nurses[0]?.id;
-      [...old,...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks)].forEach(m=>dirty.add(m));save();toast('นำเข้าข้อมูลแล้ว')})};
+      const old=[...Object.keys(S.ic||{}),...Object.keys(S.leaves||{}),...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks)];
+      S=Object.assign(defaults(),o);normalize();draft=null;reqNurse=S.nurses[0]?.id;
+      [...old,...Object.keys(S.ic),...Object.keys(S.leaves),...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks)].forEach(m=>dirty.add(m));save();toast('นำเข้าข้อมูลแล้ว')})};
   rd.readAsText(f)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('modal').innerHTML=''});
 render();
