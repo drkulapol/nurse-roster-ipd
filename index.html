@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>จัดเวรพยาบาล หอผู้ป่วยใน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#EDF1F5;--surface:#FFFFFF;--surface2:#F5F7FA;--ink:#16233A;--muted:#5A6678;--line:#D4DBE4;
+  --accent:#0F5C8C;--accent-ink:#FFFFFF;--accent-soft:#DDEBF5;
+  --warn:#B42318;--warn-bg:#FDECEA;--ok:#1D7A46;--okbg:#E2F3E8;
+  --M:#AD6800;--A:#0B7675;--N:#3F3A8F;
+  --holbg:#FCEDEE;--holink:#C0262D;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151E;--surface:#17202C;--surface2:#1C2633;--ink:#E4EAF2;--muted:#9AA7B8;--line:#2C3847;
+  --accent:#5AA8DA;--accent-ink:#0B1520;--accent-soft:#1A3045;
+  --warn:#F2877C;--warn-bg:#3A1C1A;--ok:#6FCF97;--okbg:#173022;
+  --M:#E9A93E;--A:#4CC3C1;--N:#A49EF0;--holbg:#2E1D22;--holink:#F28B90;
+}}
+:root[data-theme="dark"]{
+  --bg:#0F151E;--surface:#17202C;--surface2:#1C2633;--ink:#E4EAF2;--muted:#9AA7B8;--line:#2C3847;
+  --accent:#5AA8DA;--accent-ink:#0B1520;--accent-soft:#1A3045;
+  --warn:#F2877C;--warn-bg:#3A1C1A;--ok:#6FCF97;--okbg:#173022;
+  --M:#E9A93E;--A:#4CC3C1;--N:#A49EF0;--holbg:#2E1D22;--holink:#F28B90;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Sarabun","Noto Sans Thai","Leelawadee UI",Tahoma,sans-serif;font-size:16px;line-height:1.55}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+@media (max-width:960px){.app{grid-template-columns:1fr}}
+aside{background:var(--surface);border-right:1px solid var(--line);padding:22px 16px;position:sticky;top:0;align-self:start;height:100vh;overflow:auto}
+@media (max-width:960px){aside{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px}}
+.brand{font-weight:700;font-size:1.25rem;line-height:1.25;margin-bottom:2px}
+.brand-sub{color:var(--muted);font-size:.9rem;margin-bottom:18px}
+.month{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:18px;background:var(--surface2)}
+.month b{font-weight:600}
+.month button{border:0;background:transparent;width:34px;height:34px;border-radius:8px;font-size:1.15rem}
+.month button:hover{background:var(--surface)}
+.steps{display:flex;flex-direction:column;gap:2px;counter-reset:st}
+@media (max-width:960px){.steps{flex-direction:row;overflow-x:auto}}
+.steps button{display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:9px 10px;border-radius:9px;color:var(--muted);white-space:nowrap}
+.steps button:hover{background:var(--surface2)}
+.steps button.on{background:var(--accent-soft);color:var(--ink);font-weight:600}
+.steps i{font-style:normal;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1.5px solid currentColor;font-size:.8rem;flex:none}
+.steps button.on i{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.side-note{margin-top:22px;font-size:.82rem;color:var(--muted)}
+@media (max-width:960px){.side-note{margin-top:10px}}
+main{padding:24px 26px 70px;min-width:0}
+@media (max-width:960px){main{padding:16px 12px 60px}}
+h2.pg{font-size:1.45rem;margin:0 0 4px;font-weight:700}
+.lead{color:var(--muted);margin:0 0 18px;max-width:70ch}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.btn{border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:8px;font-weight:500}
+.btn:hover{background:var(--surface2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.5;cursor:default}
+.savebar{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:10px 14px;margin-top:16px}
+.savebar[hidden]{display:none}
+.savebar b{margin-right:auto}
+.steps .dot{width:8px;height:8px;border-radius:50%;background:var(--warn);margin-left:auto}
+.bk{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.bk .btn{font-size:.85rem;text-align:center;cursor:pointer}
+@media (max-width:960px){.bk{flex-direction:row;flex-wrap:wrap}}
+.btn.danger{background:var(--warn);border-color:var(--warn);color:#fff}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:6px 12px;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.card h3{font-size:1.08rem;margin:0 0 10px;font-weight:600}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.stats{display:flex;flex-wrap:wrap;gap:8px 22px;margin:0 0 12px;font-size:.92rem}
+.stats b{font-weight:700}
+.stats .bad{color:var(--warn)}.stats .good{color:var(--ok)}
+/* person grid */
+table.g{border-collapse:separate;border-spacing:0;font-size:13px;min-width:100%}
+table.g th,table.g td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:0;text-align:center}
+table.g thead th{background:var(--surface2);position:sticky;top:0;z-index:2;padding:4px 2px;font-weight:500}
+table.g thead th.hol{background:var(--holbg);color:var(--holink)}
+table.g .dn{display:block;font-weight:700;font-size:13px}
+table.g .dw{display:block;font-size:11px}
+table.g .nm{position:sticky;left:0;z-index:1;background:var(--surface);text-align:left;padding:5px 10px;min-width:178px;white-space:nowrap;font-weight:500}
+table.g thead .nm{z-index:3;background:var(--surface2)}
+table.g .nm small{display:block;color:var(--muted);font-weight:400;font-size:11px}
+td.c{min-width:36px;height:46px;position:relative;cursor:pointer;background:var(--surface)}
+td.c.hol{background:var(--holbg)}
+td.c:hover{box-shadow:inset 0 0 0 2px var(--accent)}
+td.c.bad{box-shadow:inset 0 0 0 2px var(--warn)}
+td.c .stk{display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px 0}
+td.c .lk{position:absolute;left:2px;top:1px;font-size:9px;color:var(--muted)}
+td.c.ro::after,td.c.rw::after{content:"";position:absolute;top:0;right:0;border-style:solid;border-width:0 9px 9px 0}
+td.c.ro::after{border-color:transparent var(--warn) transparent transparent}
+td.c.rw::after{border-color:transparent var(--ok) transparent transparent}
+.k{display:inline-block;min-width:20px;height:18px;line-height:16px;border-radius:5px;font-weight:700;font-size:12px;text-align:center;padding:0 3px;border:1.5px solid transparent}
+.k.r.M{background:var(--M);color:#fff}.k.r.A{background:var(--A);color:#fff}.k.r.N{background:var(--N);color:#fff}
+:root[data-theme="dark"] .k.r{color:#0B1520}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .k.r{color:#0B1520}}
+.k.s{background:transparent;border-style:dashed}
+.k.ot{box-shadow:0 0 0 1.5px var(--surface),0 0 0 3px var(--ink)}
+td.tc{font-weight:600;padding:0 7px;background:var(--surface2);font-size:13px;white-space:nowrap}
+td.tc.ot{font-weight:700;font-size:14px}
+td.tc.lo{color:var(--warn)}
+table.g thead th.tc{font-size:11px;line-height:1.25;padding:4px 5px;white-space:nowrap}
+.sync{display:flex;gap:7px;align-items:flex-start}
+.sync i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:6px;background:var(--muted)}
+.sync.ok i{background:var(--ok)}.sync.bad i{background:var(--warn)}
+.k.s.M{color:var(--M);border-color:var(--M)}.k.s.A{color:var(--A);border-color:var(--A)}.k.s.N{color:var(--N);border-color:var(--N)}
+td.tot{font-weight:700;padding:0 8px;background:var(--surface2)}
+tr.cov th.nm{font-weight:400;font-size:12px;background:var(--surface2)}
+tr.cov td{font-size:11px;padding:3px 1px;background:var(--surface2);line-height:1.3}
+tr.cov td.short{background:var(--warn-bg);color:var(--warn);font-weight:700}
+tr.cov.first>*{border-top:2px solid var(--line)}
+/* day view */
+table.dv{border-collapse:collapse;width:100%;font-size:14px}
+table.dv th,table.dv td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+table.dv thead th{background:var(--surface2);font-weight:600;position:sticky;top:0}
+table.dv td.d{white-space:nowrap;font-weight:600;width:96px}
+table.dv tr.hol td.d{color:var(--holink)}
+table.dv tr.hol{background:var(--holbg)}
+.nmchip{display:inline-block;margin:1px 6px 1px 0}
+.nmchip.sb{color:var(--muted)}
+.nmchip.sb::before{content:"SB ";font-size:11px;font-weight:700}
+.short-tag{color:var(--warn);font-weight:700;font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:.85rem;color:var(--muted);margin:10px 2px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.issues li{margin:3px 0}.issues .err{color:var(--warn)}
+.okmsg{color:var(--ok);font-weight:600}
+/* summary */
+table.sum{border-collapse:collapse;width:100%;font-size:14px}
+table.sum th,table.sum td{border-bottom:1px solid var(--line);padding:7px 9px;text-align:right;white-space:nowrap}
+table.sum th:first-child,table.sum td:first-child{text-align:left}
+table.sum thead th{background:var(--surface2);font-weight:600;font-size:13px}
+table.sum thead tr.grp th{text-align:center;border-bottom:0}
+table.sum td.b{font-weight:700}
+table.sum td.z{color:var(--muted)}
+table.sum tfoot td{font-weight:700;background:var(--surface2)}
+.sp{display:block;font-size:11px;color:var(--muted);font-weight:400}
+/* requests */
+.rq{display:grid;grid-template-columns:230px 1fr;gap:16px}
+@media (max-width:760px){.rq{grid-template-columns:1fr}}
+.nl{display:flex;flex-direction:column;gap:4px}
+@media (max-width:760px){.nl{flex-direction:row;flex-wrap:wrap}}
+.nl button{text-align:left;border:1px solid var(--line);background:var(--surface);padding:7px 10px;border-radius:8px}
+.nl button.on{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.nl .cnt{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal .wh{font-size:12px;color:var(--muted);text-align:center}
+.cal .wh.we{color:var(--holink)}
+.cd{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px;min-height:72px}
+.cd.hol{background:var(--holbg)}
+.cd.hol .cdn{color:var(--holink)}
+.cdn{border:0;background:none;font-weight:700;padding:0 4px;border-radius:5px;font-size:13px}
+.cb{display:flex;gap:3px;margin-top:4px}
+.rb{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 0;font-size:12px;font-weight:700}
+.rb.v1{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
+.rb.v2{background:var(--warn-bg);color:var(--warn);border-color:var(--warn);text-decoration:line-through}
+/* nurses */
+details.nc{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+details.nc>summary{cursor:pointer;padding:11px 16px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px;list-style:none}
+details.nc>summary::-webkit-details-marker{display:none}
+details.nc[open]>summary{border-bottom:1px solid var(--line)}
+.ncb{padding:14px 16px}
+.f{display:flex;flex-wrap:wrap;gap:10px 16px;margin-bottom:12px}
+.f label{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:3px}
+.f input,.f select{border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:6px 8px;font-size:15px;min-width:90px}
+.f input.w{min-width:230px}
+table.al{border-collapse:collapse;font-size:13px}
+table.al th,table.al td{border:1px solid var(--line);padding:4px 6px}
+table.al th{font-weight:500;background:var(--surface2);text-align:left}
+table.al thead th{text-align:center}
+.tg{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:2px 8px;font-size:12px;margin:1px;color:var(--muted)}
+.tg.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tg.sb.on{background:var(--accent-soft);color:var(--accent);border-style:dashed;border-color:var(--accent)}
+.note{font-size:.86rem;color:var(--muted);margin:6px 0 0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+table.st{border-collapse:collapse;font-size:15px}
+table.st th,table.st td{border-bottom:1px solid var(--line);padding:6px 10px;text-align:center}
+table.st th:first-child{text-align:left}
+table.st input{width:60px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:4px 6px;text-align:center}
+.chk{display:flex;gap:8px;align-items:flex-start;margin:7px 0;font-size:.93rem}
+.chk input{margin-top:5px}
+.grp{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px;background:var(--surface2)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+.hc{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;max-width:420px}
+.hc button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:6px 0;font-size:14px}
+.hc button.on{background:var(--holbg);border-color:var(--holink);color:var(--holink);font-weight:700}
+.hc .wh{font-size:12px;color:var(--muted);text-align:center}
+/* modal & toast */
+.modal{position:fixed;inset:0;background:rgba(10,18,30,.42);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.mbox{background:var(--surface);border-radius:14px;padding:18px;width:min(430px,100%);border:1px solid var(--line)}
+.mbox h3{margin:0;font-size:1.1rem}
+.srow{display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;margin:10px 0}
+.srow .seg{display:flex}.srow .seg button{flex:1;padding:7px 0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:9px;font-size:14px;z-index:60;max-width:90vw}
+@media (prefers-reduced-motion:no-preference){.toast{animation:tin .18s ease-out}@keyframes tin{from{opacity:0;transform:translate(-50%,6px)}}}
+.prog{font-size:.9rem;color:var(--muted)}
+.empty{padding:30px;text-align:center}
+.empty p{max-width:56ch;margin:8px auto 18px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">จัดเวรพยาบาล<br>หอผู้ป่วยใน</div>
+    <div class="brand-sub" id="bsub"></div>
+    <div class="month"><button data-act="mprev" aria-label="เดือนก่อน">‹</button><b id="mlabel"></b><button data-act="mnext" aria-label="เดือนถัดไป">›</button></div>
+    <nav class="steps" id="steps"></nav>
+    <div class="side-note sync" id="sync"><i></i><span>บันทึกไว้ในเบราว์เซอร์เครื่องนี้</span></div>
+    <div class="side-note bk"><button class="btn ghost" data-act="backup">สำรองข้อมูล (.json)</button><label class="btn ghost">นำเข้าข้อมูลสำรอง<input type="file" id="restore" accept=".json,application/json" hidden></label></div>
+  </aside>
+  <main id="main"></main>
+</div>
+<div id="modal"></div><div id="toast"></div>
+<script>
+/* ================= constants ================= */
+const SH=['N','M','A'],SHN={N:'ดึก',M:'เช้า',A:'บ่าย'},SHC={N:'ด',M:'ช',A:'บ'};
+const ROWS=['1','2','3','4','5','6','0','ph'];
+const ROWN={'1':'จันทร์','2':'อังคาร','3':'พุธ','4':'พฤหัสบดี','5':'ศุกร์','6':'เสาร์','0':'อาทิตย์','ph':'นักขัตฤกษ์ (จ–ศ)'};
+const DOW=['อา','จ','อ','พ','พฤ','ศ','ส'],DOWF=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const MON=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const FIXED_HOL=['01-01','04-06','04-13','04-14','04-15','05-01','06-03','07-28','08-12','10-13','10-23','12-05','12-10','12-31'];
+const LS='ipd-roster-v3';
+const pad=n=>String(n).padStart(2,'0');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const WDR=r=>['1','2','3','4','5'].includes(r);
+const sum=a=>{let t=0;for(const v of a)t+=v;return t};
+
+/* ================= defaults & storage ================= */
+function mkAllow(fn){const a={};ROWS.forEach(r=>{a[r]={};SH.forEach(s=>{a[r][s]=fn(r,s).map(Boolean)})});return a}
+function defaults(){
+  const t=new Date();let y=t.getFullYear(),m=t.getMonth()+1;if(m>11){m=0;y++}
+  const run=(id,name)=>({id,name,nick:'',mode:'quota',quota:20,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,allow:mkAllow(()=>[1,1])});
+  return {v:3,year:y,month:m,
+    nurses:[
+      {id:'n1',name:'พนารัตน์ เจดีย์กอง',nick:'',mode:'fixed',quota:0,maxShifts:0,maxReg:6,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>WDR(r)&&s!=='N'?[1,0]:[0,0])},
+      {id:'n2',name:'หนึ่งนุช เชนยวนิช',nick:'',mode:'ot',quota:0,maxShifts:0,maxReg:6,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>(r==='1'||r==='4')&&s==='A'?[1,0]:(r==='2'||r==='5')&&s==='N'?[0,1]:[0,0])},
+      {id:'n3',name:'สุดาทิพย์ กรรเชียง',nick:'',mode:'fixed',quota:0,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>WDR(r)&&s==='M'?[1,0]:((r==='5'&&s==='A')||(r==='6'&&s==='N'))?[1,1]:[0,0])},
+      {id:'n4',name:'สุนิตย์ แซ่เติน',nick:'',mode:'ot',quota:0,maxShifts:0,maxReg:12,maxSb:3,maxNight:3,allow:mkAllow((r,s)=>WDR(r)&&s!=='M'?[1,1]:[0,0])},
+      run('n5','ศิริพร ภูลังกา'),run('n6','เมธินี กำธรนิมิตร'),run('n7','ชัญญานุช มีคำ'),run('n8','อชิรญา เสารางทอย'),run('n9','นุชนาฏ ปันปั๋น'),
+      {id:'n10',name:'ณัฐรดา พิษสมอญ',nick:'',mode:'quota',quota:12,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>(r==='1'||r==='2')&&s==='M'?[0,0]:[1,1])},
+      {id:'n11',name:'สาวิตรี อินธรรม',nick:'',mode:'ot',quota:0,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,allow:mkAllow((r,s)=>WDR(r)?(s==='N'?[0,1]:[0,0]):[1,1])}
+    ],
+    staffing:{wd:{N:{r:2,s:1},M:{r:4,s:0},A:{r:2,s:1}},hol:{N:{r:2,s:1},M:{r:3,s:1},A:{r:2,s:1}}},
+    rules:{maxConsec:3,forbidNMA:true,fixedCount:true,quotaOrder:'date',sbInQuota:false,carry:true,effort:2},
+    groups:[{members:['n10','n2','n11'],shifts:['A','N'],sb:false}],
+    holOverride:{},requests:{},rosters:{},locks:{}};
+}
+function load(){try{const s=localStorage.getItem(LS);if(s){const o=JSON.parse(s);if(o&&o.v===3)return o}}catch(e){}return null}
+let S=load()||defaults();
+/* ---------- storage backends: claude.ai db, or Google Sheets (Apps Script) ---------- */
+// ถ้านำไปวางบน GitHub: ใส่ URL ของ Web App จาก Apps Script ตรงนี้ คนที่เปิดลิงก์จะกรอกแค่รหัสครั้งเดียว
+const DEFAULT_GAS_URL='';
+const IS_CLAUDE=!!(window.claude&&typeof window.claude.use==='function');
+let BK=null,BKKIND='',dbRO=false,syncT=null;const dirty=new Set();
+const curMk=()=>`${S.year}-${pad(S.month+1)}`;
+function gasCfg(){let url='',token='';try{url=localStorage.getItem('ipd-gas-url')||'';token=localStorage.getItem('ipd-gas-token')||''}catch(e){}return {url:url||DEFAULT_GAS_URL,token}}
+let syncState='local';
+function setSync(st){syncState=st;const el=document.getElementById('sync');if(!el)return;
+  const where=BKKIND==='gas'?'บันทึกลง Google Sheets แล้ว ทุกเครื่องที่เชื่อมต่อจะเห็นข้อมูลเดียวกัน':'บันทึกแล้ว เปิดลิงก์นี้จากเครื่องไหนก็เห็นข้อมูลเดียวกัน';
+  const M={local:['','บันทึกไว้ในเบราว์เซอร์เครื่องนี้เท่านั้น เปิดจากเครื่องอื่นจะไม่เห็นข้อมูล'],loading:['','กำลังโหลดข้อมูล…'],saving:['','กำลังบันทึก…'],
+    saved:['ok',where],ro:['bad','เปิดดูได้อย่างเดียว สิ่งที่แก้จะไม่ถูกบันทึก'],
+    err:['bad','บันทึกไม่สำเร็จ จะลองใหม่เมื่อแก้ไขครั้งถัดไป'],quota:['bad','พื้นที่เก็บข้อมูลเต็ม บันทึกไม่ได้'],
+    auth:['bad','รหัส Google Sheets ไม่ถูกต้อง ตอนนี้บันทึกเฉพาะเครื่องนี้'],net:['bad','ติดต่อ Google Sheets ไม่ได้ ตอนนี้บันทึกเฉพาะเครื่องนี้']}[st];
+  el.className='side-note sync '+M[0];el.querySelector('span').textContent=M[1]}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}dirty.add(curMk());if(BK&&!dbRO){clearTimeout(syncT);setSync('saving');syncT=setTimeout(syncNow,BKKIND==='gas'?1500:700)}}
+const cfgDoc=()=>({v:3,year:S.year,month:S.month,nurses:S.nurses,staffing:S.staffing,rules:S.rules,groups:S.groups,holOverride:S.holOverride,at:Date.now()});
+const monthDoc=mk=>({requests:S.requests[mk]||{},roster:S.rosters[mk]||null,locks:S.locks[mk]||{},at:Date.now()});
+function claudeBk(db){return {
+  async save(items){for(const it of items)await db.doc(it.key==='config'?'roster/config':'months/'+it.key.slice(6)).set(it.value)},
+  async load(){const cs=await db.doc('roster/config').get();const months={};
+    if(cs.exists){const qs=await db.collection('months').get();qs.docs.forEach(d=>months[d.id]=d.data()||{})}
+    return {config:cs.exists?cs.data():null,months}}}}
+function gasBk(g){
+  const call=async body=>{let r;try{r=await fetch(g.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...body,token:g.token}),redirect:'follow'})}catch(e){throw {code:'net'}}
+    let j;try{j=await r.json()}catch(e){throw {code:'net'}}if(!j.ok)throw {code:j.error==='unauthorized'?'auth':'err'};return j};
+  return {
+    async save(items){await call({action:'save',items})},
+    async load(){const j=await call({action:'load'}),it=j.items||{},months={};Object.keys(it).forEach(k=>{if(k.startsWith('month:'))months[k.slice(6)]=it[k]});return {config:it.config||null,months}}}}
+async function syncNow(){
+  if(!BK||dbRO)return false;const ms=[...dirty];dirty.clear();
+  const items=[{key:'config',value:cfgDoc()},...ms.map(mk=>({key:'month:'+mk,value:monthDoc(mk)}))];
+  try{await BK.save(items);setSync('saved');return true}
+  catch(e){const c=e&&e.code;ms.forEach(m=>dirty.add(m));
+    if(c==='invalid_argument'){dbRO=true;setSync('ro')}else if(c==='quota_exceeded')setSync('quota');else if(c==='auth')setSync('auth');else if(c==='net')setSync('net');else setSync('err');return false}
+}
+function allMonthKeys(){return [...new Set([...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks),curMk()])]}
+async function connectBackend(bk,kind,canW){
+  BK=bk;BKKIND=kind;dbRO=false;setSync('loading');
+  const data=await bk.load();
+  if(data.config&&data.config.v===3){
+    const d=data.config;S.nurses=d.nurses;S.staffing=d.staffing;S.rules=d.rules;S.groups=d.groups;S.holOverride=d.holOverride||{};
+    if(typeof d.year==='number'){S.year=d.year;S.month=d.month}
+    Object.entries(data.months).forEach(([mk,x])=>{x=x||{};S.requests[mk]=x.requests||{};S.locks[mk]=x.locks||{};if(x.roster)S.rosters[mk]=x.roster;else delete S.rosters[mk]});
+    S=JSON.parse(JSON.stringify(S));draft=null;
+    try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+    if(canW===false){dbRO=true;setSync('ro')}else setSync('saved');
+    return 'loaded';
+  }
+  if(canW===false){dbRO=true;setSync('ro');return 'empty'}
+  allMonthKeys().forEach(m=>dirty.add(m));await syncNow();return 'pushed';
+}
+async function initDb(){
+  try{
+    if(IS_CLAUDE){
+      const [dl,db,us]=await Promise.all([claude.use('downloads'),claude.use('db'),claude.use('user')]);
+      DL=dl;if(!db){setSync('local');render();return}
+      let canW=null;try{canW=us?await us.can('data.write'):null}catch(e){}
+      await connectBackend(claudeBk(db),'claude',canW);
+    }else{
+      const g=gasCfg();if(!(g.url&&g.token)){setSync('local');render();return}
+      await connectBackend(gasBk(g),'gas',null);
+    }
+    reqNurse=S.nurses[0]?.id;render();
+  }catch(e){BK=null;const c=e&&e.code;setSync(c==='auth'?'auth':c==='net'?'net':'local');render()}
+}
+async function gasConnect(){
+  const url=(document.getElementById('gasurl')?.value||'').trim(),token=(document.getElementById('gastoken')?.value||'').trim();
+  if(!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(url)){toast('URL ต้องเป็นลิงก์ Web App ที่ขึ้นต้นด้วย https://script.google.com/macros/s/ และลงท้ายด้วย /exec');return}
+  if(!token){toast('กรอกรหัสที่ตั้งไว้ใน Apps Script');return}
+  try{localStorage.setItem('ipd-gas-url',url);localStorage.setItem('ipd-gas-token',token)}catch(e){}
+  try{const r=await connectBackend(gasBk({url,token}),'gas',null);reqNurse=S.nurses[0]?.id;render();
+    toast(r==='loaded'?'เชื่อมต่อแล้ว โหลดข้อมูลจาก Google Sheets มาแทนข้อมูลในเครื่องนี้':'เชื่อมต่อแล้ว ส่งข้อมูลในเครื่องนี้ขึ้น Google Sheets แล้ว')}
+  catch(e){BK=null;BKKIND='';const c=e&&e.code;setSync(c==='auth'?'auth':c==='net'?'net':'local');render();
+    toast(c==='auth'?'รหัสไม่ตรงกับที่ตั้งไว้ใน Apps Script':'ติดต่อ Google Sheets ไม่ได้ ตรวจ URL และการ Deploy (สิทธิ์ต้องเป็น Anyone)')}
+}
+function gasOff(){try{localStorage.removeItem('ipd-gas-token')}catch(e){}BK=null;BKKIND='';setSync('local');render();toast('ยกเลิกการเชื่อมต่อแล้ว ข้อมูลยังอยู่ในเครื่องนี้และใน Google Sheets')}
+function gasPanel(){
+  if(IS_CLAUDE)return '';const g=gasCfg(),on=BKKIND==='gas'&&BK;
+  return `<div class="card"><h3>เก็บข้อมูลใน Google Sheets</h3>
+  <p class="note" style="margin:0 0 10px">เชื่อมต่อแล้วทุกเครื่องที่ใส่รหัสเดียวกันจะเห็นตารางชุดเดียวกัน ถ้าใน Sheets มีข้อมูลอยู่แล้ว ระบบจะใช้ข้อมูลจาก Sheets แทนข้อมูลในเครื่องนี้ (กดสำรองข้อมูลไว้ก่อนได้) ${on?'<b class="okmsg">เชื่อมต่ออยู่</b>':''}</p>
+  <div class="f"><label>URL ของ Web App<input class="w" id="gasurl" value="${esc(g.url)}" placeholder="https://script.google.com/macros/s/…/exec" style="min-width:min(520px,80vw)"></label>
+  <label>รหัส<input id="gastoken" type="password" value="${esc(g.token)}" autocomplete="off"></label></div>
+  <div class="row"><button class="btn pri" data-act="gasconn">${on?'เชื่อมต่อใหม่':'เชื่อมต่อ'}</button>${on||g.token?'<button class="btn ghost" data-act="gasoff">ยกเลิกการเชื่อมต่อ</button>':''}</div></div>`;
+}
+
+let page='roster',view='person',reqNurse=S.nurses[0]?.id,openCards=new Set(),DL=null,busy=false,draft=null;
+initDb();
+function toast(msg){const t=document.getElementById('toast');t.innerHTML=`<div class="toast">${esc(msg)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>t.innerHTML='',3000)}
+
+/* ================= calendar context ================= */
+function isHol(y,m,d,dow){const k=`${y}-${pad(m+1)}-${pad(d)}`;if(k in S.holOverride)return S.holOverride[k];return dow===0||dow===6||FIXED_HOL.includes(`${pad(m+1)}-${pad(d)}`)}
+function ctxFor(y,m){
+  const D=new Date(y,m+1,0).getDate(),days=[];
+  for(let d=1;d<=D;d++){const dow=new Date(y,m,d).getDay(),hol=isHol(y,m,d,dow);
+    days.push({d,dow,hol,row:hol&&dow>=1&&dow<=5?'ph':String(dow),need:S.staffing[hol?'hol':'wd']})}
+  return {y,m,D,L:D*3,days,mk:`${y}-${pad(m+1)}`};
+}
+const ctx=()=>ctxFor(S.year,S.month);
+const req=(c,nid,d,s)=>S.requests[c.mk]?.[nid]?.[d]?.[s]||0;
+const isFixedSlot=(n,day,s)=>n.mode==='fixed'&&s==='M'&&!day.hol;
+const modeLabel=n=>n.mode==='fixed'?'เช้าวันธรรมดาประจำ ที่เหลือ OT':n.mode==='quota'?`รันเวร ${n.quota} เวรแรกเป็นเวรปกติ`:'OT ทั้งหมด';
+const shortName=n=>n.nick||n.name.split(' ')[0];
+const countsReg=(n,day,s)=>S.rules.fixedCount||!isFixedSlot(n,day,s);
+
+/* previous month tail (last 2 days = 6 slots) for consecutive-shift checks */
+function prevTail(c){
+  const out=S.nurses.map(()=>new Uint8Array(6));
+  if(!S.rules.carry)return out;
+  let y=c.y,m=c.m-1;if(m<0){m=11;y--}
+  const pk=`${y}-${pad(m+1)}`,R=S.rosters[pk];if(!R)return out;
+  S.nurses.forEach((n,i)=>{const a=R.a[n.id];if(a&&a.length>=6)out[i]=Uint8Array.from(a.slice(a.length-6))});
+  return out;
+}
+function runOK(Ai,idx,maxC,nma,prev){
+  let L=0;for(let j=idx-1;j>=-6;j--){const v=j>=0?Ai[j]:prev[6+j];if(v!==1)break;L++}
+  let R=0;for(let j=idx+1;j<Ai.length&&Ai[j]===1;j++)R++;
+  if(L+R+1>maxC)return false;
+  if(nma){const d0=idx-idx%3;let all=true;for(let k=0;k<3;k++)if(d0+k!==idx&&Ai[d0+k]!==1)all=false;if(all)return false}
+  return true;
+}
+
+/* ================= engine ================= */
+function waterfill(arr,total){
+  const f=L=>arr.map(a=>Math.max(0,Math.min(a.cap,a.lo+L)));
+  let lo=-300,hi=1500;for(let k=0;k<60;k++){const mid=(lo+hi)/2;if(sum(f(mid))<total)lo=mid;else hi=mid}
+  return f(hi);
+}
+function prep(c){
+  const L=c.L,lockM=S.locks[c.mk]||{},prev=prevTail(c);
+  const P=S.nurses.map((n,i)=>{
+    const eR=new Uint8Array(L),eS=new Uint8Array(L),fixed=new Uint8Array(L),init=new Uint8Array(L),locked=new Uint8Array(L),want=[];
+    const lk=lockM[n.id]||{};
+    c.days.forEach((day,di)=>SH.forEach((s,si)=>{
+      const idx=di*3+si,rq=req(c,n.id,day.d,s),al=n.allow[day.row][s];
+      if(rq===1)want.push(idx);
+      if(isFixedSlot(n,day,s)){fixed[idx]=1;if(al[0]&&rq!==2)init[idx]=1}
+      if(idx in lk){locked[idx]=1;init[idx]=lk[idx];return}
+      if(fixed[idx]||rq===2)return;
+      if(al[0]&&day.need[s].r>0)eR[idx]=1;
+      if(al[1]&&day.need[s].s>0)eS[idx]=1;
+    }));
+    return {n,i,eR,eS,fixed,init,locked,want,wantSet:new Set(want),
+      base:n.mode==='quota'?(+n.quota||0):0,
+      cap:(+n.maxShifts>0)?+n.maxShifts:1e9,capR:(+n.maxReg>0)?+n.maxReg:1e9,capS:(+n.maxSb>0)?+n.maxSb:1e9,maxN:(+n.maxNight>0)?+n.maxNight:1e9,ER:sum(eR),ES:sum(eS)};
+  });
+  const needR=new Int16Array(L),needS=new Int16Array(L),cntR=new Int16Array(L);
+  c.days.forEach((day,di)=>SH.forEach((s,si)=>{const idx=di*3+si;needR[idx]=day.need[s].r;needS[idx]=day.need[s].s;
+    P.forEach(p=>{if(!countsReg(p.n,day,s))cntR[idx]=1})}));
+  // which reg assignments count toward coverage
+  const regCounts=P.map(p=>{const a=new Uint8Array(L);c.days.forEach((day,di)=>SH.forEach((s,si)=>a[di*3+si]=countsReg(p.n,day,s)?1:0));return a});
+  const idI={};P.forEach((p,i)=>idI[p.n.id]=i);
+  const groups=S.groups.map(g=>({m:g.members.map(id=>idI[id]).filter(x=>x!=null),sh:new Set(g.shifts),sb:g.sb}));
+  const ginfo=P.map((p,i)=>groups.filter(g=>g.m.includes(i)&&g.m.length>1));
+  // remaining demand after fixed + locked
+  let remR=0,remS=0;
+  for(let idx=0;idx<L;idx++){let r=0,s=0;P.forEach((p,i)=>{if(p.init[idx]===1&&regCounts[i][idx])r++;if(p.init[idx]===2)s++});remR+=Math.max(0,needR[idx]-r);remS+=Math.max(0,needS[idx]-s)}
+  const preR=P.map(p=>{let k=0;for(let idx=0;idx<L;idx++)if(p.init[idx]===1&&!p.fixed[idx])k++;return k});
+  const preS=P.map(p=>{let k=0;for(let idx=0;idx<L;idx++)if(p.init[idx]===2)k++;return k});
+  const tRx=waterfill(P.map((p,i)=>({lo:Math.max(0,Math.min(p.base,p.ER+preR[i])-preR[i]),cap:Math.max(0,Math.min(p.ER,p.capR-preR[i],p.cap-preR[i]-preS[i]))})),remR);
+  const tR=tRx.map((v,i)=>v+preR[i]);
+  const tSx=waterfill(P.map((p,i)=>({lo:0,cap:Math.max(0,Math.min(p.ES,p.capS-preS[i],p.cap-tR[i]-preS[i]))})),remS);
+  const tS=tSx.map((v,i)=>v+preS[i]);
+  return {c,P,needR,needS,regCounts,ginfo,tR,tS,prev,maxC:+S.rules.maxConsec||3,nma:!!S.rules.forbidNMA};
+}
+/* feasibility for putting nurse i into idx with type t, given row counts */
+function canPut(X,A,i,idx,t,nf,nights,nr,ns){
+  const p=X.P[i],si=idx%3,s=SH[si];
+  if(A[i][idx]||p.locked[idx])return false;
+  if(!(t===1?p.eR[idx]:p.eS[idx]))return false;
+  if(nf>=p.cap)return false;
+  if(t===1&&nr>=p.capR)return false;
+  if(t===2&&ns>=p.capS)return false;
+  if(si===0&&nights>=p.maxN)return false;
+  for(const g of X.ginfo[i]){if(!g.sh.has(s))continue;for(const m of g.m){if(m===i)continue;const v=A[m][idx];if(v&&(g.sb||(v===1&&t===1)))return false}}
+  if(t===1&&!runOK(A[i],idx,X.maxC,X.nma,X.prev[i]))return false;
+  return true;
+}
+function rowStats(X,A,i){const p=X.P[i];let nf=0,nights=0,nr=0,ns=0;for(let idx=0;idx<A[i].length;idx++){const v=A[i][idx];if(!v)continue;if(!(v===1&&p.fixed[idx])){nf++;if(v===1)nr++}if(v===2)ns++;if(idx%3===0)nights++}return {nf,nights,nr,ns}}
+
+function greedy(X,jit){
+  const {c,P,needR,needS,regCounts,tR,tS}=X,L=c.L,n=P.length;
+  const A=P.map(p=>Uint8Array.from(p.init));
+  const reg=new Float64Array(n),sb=new Float64Array(n),night=new Float64Array(n),hol=new Float64Array(n),nf=new Float64Array(n),eR=new Float64Array(n),eS=new Float64Array(n);
+  P.forEach((p,i)=>{for(let idx=0;idx<L;idx++){const v=A[i][idx];if(!v)continue;if(!(v===1&&p.fixed[idx]))nf[i]++;if(v===1&&!p.fixed[idx])reg[i]++;if(v===2)sb[i]++;if(idx%3===0)night[i]++;if(c.days[(idx/3)|0].hol)hol[i]++}});
+  for(let idx=0;idx<L;idx++){
+    const di=(idx/3)|0,si=idx%3,day=c.days[di];
+    for(let i=0;i<n;i++){if(P[i].eR[idx])eR[i]++;if(P[i].eS[idx])eS[i]++}
+    let haveR=0,haveS=0;for(let i=0;i<n;i++){if(A[i][idx]===1&&regCounts[i][idx])haveR++;if(A[i][idx]===2)haveS++}
+    for(const t of [1,2]){
+      const need=t===1?needR[idx]-haveR:needS[idx]-haveS;
+      for(let k=0;k<need;k++){
+        let best=-1,bs=Infinity;
+        for(let i=0;i<n;i++){
+          if(!canPut(X,A,i,idx,t,nf[i],night[i],reg[i],sb[i]))continue;
+          const p=P[i];let sc=Math.random()*jit;
+          if(t===1){const pace=tR[i]*eR[i]/Math.max(1,p.ER);sc+=25*(reg[i]-pace);if(reg[i]>=tR[i])sc+=40*(reg[i]-tR[i]+1);if(reg[i]<p.base)sc-=15}
+          else{const pace=tS[i]*eS[i]/Math.max(1,p.ES);sc+=25*(sb[i]-pace);if(sb[i]>=tS[i])sc+=40*(sb[i]-tS[i]+1)}
+          if(p.wantSet.has(idx))sc-=1000;
+          if(si===0)sc+=3*night[i];if(day.hol)sc+=2*hol[i];
+          const Ai=A[i];if((idx>0&&Ai[idx-1])||(idx<L-1&&Ai[idx+1]))sc+=6;
+          const d0=idx-si;let same=0;for(let q=0;q<3;q++)if(Ai[d0+q])same++;sc+=4*same;
+          if(sc<bs){bs=sc;best=i}
+        }
+        if(best<0)continue;
+        A[best][idx]=t;nf[best]++;if(t===1)reg[best]++;else sb[best]++;if(si===0)night[best]++;if(day.hol)hol[best]++;
+      }
+    }
+  }
+  return A;
+}
+function evalA(X,A){
+  const {c,P,needR,needS,regCounts,tR,tS}=X,L=c.L,n=P.length;
+  let uR=0,uS=0,over=0,obj=0,unmet=0;
+  for(let idx=0;idx<L;idx++){let r=0,s=0;for(let i=0;i<n;i++){const v=A[i][idx];if(v===1&&regCounts[i][idx])r++;else if(v===2)s++}
+    if(r<needR[idx])uR+=needR[idx]-r;else over+=r-needR[idx];if(s<needS[idx])uS+=needS[idx]-s;else over+=s-needS[idx]}
+  obj+=uR*1e5+uS*2e4+over*5e3;
+  const nightQ=[],holQ=[];
+  P.forEach((p,i)=>{
+    let reg=0,sb=0,night=0,hol=0,dbl=0;const Ai=A[i];
+    for(let idx=0;idx<L;idx++){const v=Ai[idx];if(!v)continue;if(v===1&&!p.fixed[idx])reg++;if(v===2)sb++;if(idx%3===0)night++;if(c.days[(idx/3)|0].hol)hol++}
+    for(let d=0;d<c.D;d++){let k=0;for(let q=0;q<3;q++)if(Ai[d*3+q])k++;if(k>=2)dbl++}
+    p.want.forEach(idx=>{if(!Ai[idx]){obj+=2000;unmet++}});
+    obj+=30*(reg-tR[i])**2+15*(sb-tS[i])**2+3*dbl;
+    const q=reg+(S.rules.sbInQuota?sb:0);if(q<p.base)obj+=800*(p.base-q);
+    if(p.n.mode==='quota'){nightQ.push(night);holQ.push(hol)}
+  });
+  const vr=a=>{if(!a.length)return 0;const m=sum(a)/a.length;return sum(a.map(x=>(x-m)**2))};
+  obj+=10*vr(nightQ)+5*vr(holQ);
+  return {obj,uR,uS,unmet};
+}
+/* local search: move single assignments between nurses */
+function improve(X,A,iters){
+  const {c,P}=X,L=c.L,n=P.length;let cur=evalA(X,A).obj;
+  for(let it=0;it<iters;it++){
+    const idx=(Math.random()*L)|0;
+    // pick a mover: either an existing assignee (move) or an empty spot (fill)
+    const holders=[];for(let i=0;i<n;i++){const v=A[i][idx];if(v&&!P[i].locked[idx]&&!(v===1&&P[i].fixed[idx]))holders.push(i)}
+    const fill=Math.random()<.25;
+    let j=-1,t;
+    if(fill||!holders.length){t=Math.random()<.6?1:2}else{j=holders[(Math.random()*holders.length)|0];t=A[j][idx]}
+    const cands=[];for(let i=0;i<n;i++){if(i===j)continue;cands.push(i)}
+    const i=cands[(Math.random()*cands.length)|0];
+    if(j>=0)A[j][idx]=0;
+    const st=rowStats(X,A,i);
+    if(!canPut(X,A,i,idx,t,st.nf,st.nights,st.nr,st.ns)){if(j>=0)A[j][idx]=t;continue}
+    A[i][idx]=t;
+    const nv=evalA(X,A).obj;
+    if(nv<=cur){cur=nv}else{A[i][idx]=0;if(j>=0)A[j][idx]=t}
+  }
+  return cur;
+}
+async function generate(){
+  if(busy)return;busy=true;
+  const c=ctx(),X=prep(c),E=[[80,1500],[180,4000],[350,9000]][(+S.rules.effort||2)-1]||[180,4000];
+  const pg=m=>{const el=document.getElementById('prog');if(el)el.textContent=m};
+  let best=null,bo=Infinity;
+  for(let it=0;it<E[0];it++){
+    const A=greedy(X,10),o=evalA(X,A).obj;if(o<bo){bo=o;best=A}
+    if(it%12===0){pg(`กำลังลองจัด ${it+1}/${E[0]} แบบ…`);await new Promise(r=>setTimeout(r,0))}
+  }
+  const chunk=500;
+  for(let k=0;k<E[1];k+=chunk){improve(X,best,chunk);pg(`กำลังปรับให้สมดุล ${Math.min(100,Math.round((k+chunk)/E[1]*100))}%`);await new Promise(r=>setTimeout(r,0))}
+  const ev=evalA(X,best);
+  const a={};S.nurses.forEach((n,i)=>a[n.id]=Array.from(best[i]));
+  S.rosters[c.mk]={a,at:Date.now()};save();busy=false;render();
+  toast(ev.uR||ev.uS?`จัดเสร็จ แต่ยังขาด: เวรปกติ ${ev.uR} / standby ${ev.uS} — ดูรายละเอียดใต้ตาราง`:'จัดตารางเสร็จ ครบทุกเวร');
+}
+function getA(c){const R=S.rosters[c.mk];if(!R)return null;return S.nurses.map(n=>R.a[n.id]&&R.a[n.id].length===c.L?Uint8Array.from(R.a[n.id]):new Uint8Array(c.L))}
+function setA(c,A){const a={};S.nurses.forEach((n,i)=>a[n.id]=Array.from(A[i]));S.rosters[c.mk]={a,at:Date.now()};save()}
+
+/* ================= checks & summary ================= */
+function validate(c,A){
+  const issues=[],cell={},cov=[],maxC=+S.rules.maxConsec||3,nma=!!S.rules.forbidNMA,prev=prevTail(c);
+  const mark=(i,idx,m)=>{(cell[i+':'+idx]=cell[i+':'+idx]||[]).push(m)};
+  const idI={};S.nurses.forEach((n,i)=>idI[n.id]=i);
+  const dt=d=>`${d} ${MON[c.m].slice(0,3)}.`;
+  c.days.forEach((day,di)=>SH.forEach((s,si)=>{
+    const idx=di*3+si;let r=0,sb=0;
+    S.nurses.forEach((n,i)=>{const v=A[i][idx];if(v===1&&countsReg(n,day,s))r++;if(v===2)sb++});
+    const nr=day.need[s].r,ns=day.need[s].s;cov[idx]={r,sb,nr,ns};
+    if(r<nr)issues.push({e:1,t:`${dt(day.d)} เวร${SHN[s]}: ขาดเวรปกติ ${nr-r} คน`});
+    if(sb<ns)issues.push({e:1,t:`${dt(day.d)} เวร${SHN[s]}: ขาด standby ${ns-sb} คน`});
+    if(r>nr)issues.push({e:0,t:`${dt(day.d)} เวร${SHN[s]}: เวรปกติเกิน ${r-nr} คน`});
+    if(sb>ns)issues.push({e:0,t:`${dt(day.d)} เวร${SHN[s]}: standby เกิน ${sb-ns} คน`});
+    S.groups.forEach(g=>{if(!g.shifts.includes(s))return;const on=g.members.map(id=>idI[id]).filter(i=>i!=null&&(g.sb?A[i][idx]>0:A[i][idx]===1));
+      if(on.length>1)on.forEach(i=>mark(i,idx,'อยู่เวรเดียวกับคนในกลุ่มที่ห้ามอยู่ด้วยกัน'))});
+  }));
+  S.nurses.forEach((n,i)=>{
+    const Ai=A[i];let nf=0,nights=0,reg=0,sb=0,unmet=0,regNF=0;
+    c.days.forEach((day,di)=>SH.forEach((s,si)=>{
+      const idx=di*3+si,v=Ai[idx],rq=req(c,n.id,day.d,s);
+      if(rq===1&&!v)unmet++;
+      if(!v)return;
+      const fx=v===1&&isFixedSlot(n,day,s);
+      if(!fx){nf++;if(v===1)regNF++}if(si===0)nights++;if(v===1)reg++;else sb++;
+      if(rq===2)mark(i,idx,`ขึ้นเวร${SHN[s]}ในวันที่ขอไม่ขึ้น`);
+      const al=n.allow[day.row][s];
+      if((v===1&&!al[0])||(v===2&&!al[1]))mark(i,idx,`เงื่อนไขไม่ให้ขึ้น${v===2?' standby ':''}เวร${SHN[s]}วันนี้`);
+      if(v===1&&!runOK(Ai,idx,maxC,nma,prev[i]))mark(i,idx,`เวรปกติติดกันเกิน ${maxC} เวร หรือเป็นดึก-เช้า-บ่าย`);
+    }));
+    if(+n.maxShifts>0&&nf>+n.maxShifts)issues.push({e:1,t:`${n.name}: ${nf} เวร เกินที่กำหนด ${n.maxShifts} เวร`});
+    if(+n.maxReg>0&&regNF>+n.maxReg)issues.push({e:1,t:`${n.name}: เวรปกติ ${regNF} เวร เกินที่กำหนด ${n.maxReg} เวร`});
+    if(+n.maxSb>0&&sb>+n.maxSb)issues.push({e:1,t:`${n.name}: standby ${sb} เวร เกินที่กำหนด ${n.maxSb} เวร`});
+    if(+n.maxNight>0&&nights>+n.maxNight)issues.push({e:1,t:`${n.name}: เวรดึก ${nights} เวร เกินที่กำหนด ${n.maxNight} เวร`});
+    const q=reg+(S.rules.sbInQuota?sb:0);
+    if(n.mode==='quota'&&q<+n.quota)issues.push({e:1,t:`${n.name}: นับเวรได้ ${q} เวร ยังไม่ถึงโควตา ${n.quota} เวร`});
+    if(unmet)issues.push({e:0,t:`${n.name}: คำขอขึ้นเวรที่ยังไม่ได้ ${unmet} เวร`});
+  });
+  Object.entries(cell).forEach(([k,m])=>{const [i,idx]=k.split(':').map(Number);const day=c.days[(idx/3)|0];
+    issues.push({e:1,t:`${S.nurses[i].name} ${dt(day.d)}: ${[...new Set(m)].join(', ')}`})});
+  return {issues,cell,cov};
+}
+function classify(c,A,i){
+  const n=S.nurses[i],list=[];
+  c.days.forEach((day,di)=>SH.forEach((s,si)=>{const v=A[i][di*3+si];if(v)list.push({di,day,s,v,hol:day.hol,fixed:v===1&&isFixedSlot(n,day,s),wdM:!day.hol&&s==='M'})}));
+  list.forEach(x=>x.lab=x.v===2?'SB':'OT');
+  if(n.mode==='fixed')list.forEach(x=>{if(x.fixed)x.lab='WORK'});
+  else if(n.mode==='quota'){
+    let pool=list.filter(x=>x.v===1||(S.rules.sbInQuota&&x.v===2));
+    if(S.rules.quotaOrder==='wdM')pool=[...pool.filter(x=>x.wdM&&x.v===1),...pool.filter(x=>!(x.wdM&&x.v===1))];
+    pool.slice(0,+n.quota||0).forEach(x=>x.lab='WORK');
+  }
+  return list;
+}
+function summarize(c,A){
+  return S.nurses.map((n,i)=>{
+    const o={n,total:0,nights:0,work:0,ot:{N:[0,0],M:[0,0],A:[0,0]},sb:{N:[0,0],M:[0,0],A:[0,0]}};
+    classify(c,A,i).forEach(x=>{o.total++;if(x.s==='N')o.nights++;
+      if(x.lab==='WORK')o.work++;else if(x.lab==='OT')o.ot[x.s][x.hol?1:0]++;else o.sb[x.s][x.hol?1:0]++});
+    o.otT=SH.reduce((t,s)=>t+o.ot[s][0]+o.ot[s][1],0);o.sbT=SH.reduce((t,s)=>t+o.sb[s][0]+o.sb[s][1],0);
+    return o;
+  });
+}
+
+/* ================= views ================= */
+const PAGES=[['roster','ตารางเวร'],['summary','สรุปเวรและ OT'],['req','คำขอเวรรายคน'],['nurses','พยาบาลและเงื่อนไข'],['staff','อัตรากำลัง วันหยุด กติกา']];
+function render(){
+  const c=ctx();
+  document.getElementById('mlabel').textContent=`${MON[c.m]} ${c.y+543}`;
+  document.getElementById('bsub').textContent=`พยาบาล ${S.nurses.length} คน · วันหยุด ${c.days.filter(d=>d.hol).length} วัน`;
+  document.getElementById('steps').innerHTML=PAGES.map(([k,l],ix)=>`<button data-act="page" data-k="${k}" class="${page===k?'on':''}"><i>${ix+1}</i>${l}${k==='nurses'&&draft?'<span class="dot" title="ยังไม่บันทึก"></span>':''}</button>`).join('');
+  const m=document.getElementById('main');
+  m.innerHTML=page==='roster'?vRoster(c):page==='summary'?vSummary(c):page==='req'?vReq(c):page==='nurses'?vNurses():vStaff(c);
+}
+const K=(s,v,ot)=>`<span class="k ${v===1?'r':'s'} ${s}${ot?' ot':''}">${SHC[s]}</span>`;
+function labMaps(c,A){return S.nurses.map((n,i)=>{const m={};classify(c,A,i).forEach(x=>m[x.di*3+SH.indexOf(x.s)]=x.lab);return m})}
+const workLabel=o=>o.n.mode==='quota'?`${o.work}/${o.n.quota}`:o.n.mode==='fixed'?String(o.work):'–';
+function exportBtns(){return `<button class="btn" data-act="xlsx">ส่งออก Excel</button><button class="btn" data-act="print">ส่งออกไฟล์สำหรับพิมพ์</button>`}
+function vRoster(c){
+  const A=getA(c);
+  let h=`<h2 class="pg">ตารางเวร ${MON[c.m]} ${c.y+543}</h2>`;
+  if(!A)return h+`<div class="card empty"><h3>ยังไม่มีตารางเวรเดือนนี้</h3><p>ตรวจวันหยุดในขั้นที่ 5 และใส่คำขอขึ้น/ไม่ขึ้นเวรในขั้นที่ 3 ก่อน แล้วกดปุ่มด้านล่าง ระบบจะลองจัดหลายร้อยแบบ เลือกแบบที่ครบเวรที่สุด แล้วปรับเกลี่ยเวรและ OT ให้ใกล้เคียงกัน</p><button class="btn pri" data-act="gen">จัดตารางเวร</button><div class="prog" id="prog" style="margin-top:10px"></div></div>`;
+  const V=validate(c,A),ev=V.issues,errs=ev.filter(x=>x.e),infos=ev.filter(x=>!x.e);
+  let shortR=0,shortS=0;V.cov.forEach(v=>{shortR+=Math.max(0,v.nr-v.r);shortS+=Math.max(0,v.ns-v.sb)});
+  const locks=S.locks[c.mk]||{},nLock=sum(Object.values(locks).map(o=>Object.keys(o).length));
+  h+=`<p class="lead">คลิกช่องในตารางเพื่อแก้ไข ช่องที่แก้เองจะถูกล็อกไว้ เมื่อกดจัดใหม่ระบบจะคงช่องที่ล็อกและจัดส่วนที่เหลือให้</p>
+  <div class="bar"><button class="btn pri" data-act="gen">จัดตารางใหม่</button><span class="prog" id="prog"></span>${exportBtns()}
+  ${nLock?`<button class="btn ghost" data-act="unlock">ปลดล็อกทั้งหมด (${nLock})</button>`:''}<button class="btn ghost" data-act="clear">ลบตารางเดือนนี้</button></div>
+  <div class="stats"><span>ขาดเวรปกติ <b class="${shortR?'bad':'good'}">${shortR}</b></span><span>ขาด standby <b class="${shortS?'bad':'good'}">${shortS}</b></span><span>ผิดเงื่อนไข <b class="${errs.length-(shortR||shortS?V.cov.filter(v=>v.r<v.nr||v.sb<v.ns).length:0)>0?'bad':'good'}">${Object.keys(V.cell).length}</b> ช่อง</span>
+  <span class="seg" style="margin-left:auto"><button data-act="view" data-v="person" class="${view==='person'?'on':''}">รายคน</button><button data-act="view" data-v="day" class="${view==='day'?'on':''}">รายวัน</button></span></div>`;
+  if(view==='person'){
+    h+=`<div class="legend"><span>${K('N',1)} ดึก</span><span>${K('M',1)} เช้า</span><span>${K('A',1)} บ่าย</span><span>${K('A',2)} กรอบเส้นประ = standby</span><span>มุมเขียว/แดง = ขอขึ้น/ขอไม่ขึ้น</span><span>${K('A',1,1)} มีกรอบรอบนอก = นับเป็น OT</span><span>🔒 = ล็อก</span></div>
+    <div class="scroll"><table class="g"><thead><tr><th class="nm">พยาบาล</th>${c.days.map(d=>`<th class="${d.hol?'hol':''}"><span class="dn">${d.d}</span><span class="dw">${DOW[d.dow]}</span></th>`).join('')}<th class="tc">เวรปกติ<br>(โควตา)</th><th class="tc">OT</th><th class="tc">SB</th><th class="tc">รวม</th></tr></thead><tbody>`;
+    const SM=summarize(c,A),LM=labMaps(c,A);
+    S.nurses.forEach((n,i)=>{
+      const lk=locks[n.id]||{},o=SM[i];
+      h+=`<tr><th class="nm">${i+1}. ${esc(n.name)}<small>${esc(modeLabel(n))}</small></th>`;
+      c.days.forEach((day,di)=>{let ch='',bad=false,ro=false,rw=false,isL=false;
+        SH.forEach((s,si)=>{const idx=di*3+si,v=A[i][idx];if(v)ch+=K(s,v,LM[i][idx]==='OT');if(V.cell[i+':'+idx])bad=true;if(idx in lk)isL=true;const rq=req(c,n.id,day.d,s);if(rq===2)ro=true;if(rq===1)rw=true});
+        h+=`<td class="c ${day.hol?'hol':''} ${bad?'bad':''} ${ro?'ro':rw?'rw':''}" data-act="cell" data-i="${i}" data-di="${di}" title="${esc(n.name)} วันที่ ${day.d}">${isL?'<span class="lk">🔒</span>':''}<div class="stk">${ch}</div></td>`});
+      h+=`<td class="tc ${n.mode==='quota'&&o.work<+n.quota?'lo':''}">${workLabel(o)}</td><td class="tc ot">${o.otT}</td><td class="tc">${o.sbT}</td><td class="tc">${o.total}</td></tr>`;
+    });
+    ['M','A','N'].forEach((s,k)=>{const si=SH.indexOf(s);
+      h+=`<tr class="cov ${k===0?'first':''}"><th class="nm">${SHN[s]} มี/ต้องการ</th>${c.days.map((d,di)=>{const v=V.cov[di*3+si];return `<td class="${v.r<v.nr||v.sb<v.ns?'short':''}">${v.r}/${v.nr}${v.ns?`<br>S${v.sb}/${v.ns}`:''}</td>`}).join('')}${k===0?`<td class="tc">${SM.reduce((t,o)=>t+o.work,0)}</td><td class="tc ot">${SM.reduce((t,o)=>t+o.otT,0)}</td><td class="tc">${SM.reduce((t,o)=>t+o.sbT,0)}</td><td class="tc">${SM.reduce((t,o)=>t+o.total,0)}</td>`:'<td colspan="4"></td>'}</tr>`});
+    h+=`</tbody></table></div>`;
+  }else{
+    h+=`<div class="scroll"><table class="dv"><thead><tr><th>วันที่</th>${['M','A','N'].map(s=>`<th>${SHN[s]}</th>`).join('')}</tr></thead><tbody>`;
+    c.days.forEach((day,di)=>{
+      h+=`<tr class="${day.hol?'hol':''}"><td class="d">${DOW[day.dow]} ${day.d}</td>${['M','A','N'].map(s=>{const si=SH.indexOf(s),idx=di*3+si,v=V.cov[idx];
+        const regs=S.nurses.map((n,i)=>A[i][idx]===1?`<span class="nmchip">${esc(shortName(n))}</span>`:'').join('');
+        const sbs=S.nurses.map((n,i)=>A[i][idx]===2?`<span class="nmchip sb">${esc(shortName(n))}</span>`:'').join('');
+        const sh=[v.r<v.nr?`ขาด ${v.nr-v.r}`:'',v.sb<v.ns?`ขาด SB ${v.ns-v.sb}`:''].filter(Boolean).join(' ');
+        return `<td>${regs}${sbs?'<br>'+sbs:''}${sh?` <span class="short-tag">${sh}</span>`:''}</td>`}).join('')}</tr>`});
+    h+=`</tbody></table></div>`;
+  }
+  h+=`<div class="card issues" style="margin-top:16px"><h3>ผลการตรวจตาราง</h3>${errs.length?`<ul>${errs.map(x=>`<li class="err">${esc(x.t)}</li>`).join('')}</ul>`:'<p class="okmsg">ครบอัตรากำลังทุกเวร และไม่ผิดเงื่อนไข</p>'}${infos.length?`<ul class="small muted">${infos.map(x=>`<li>${esc(x.t)}</li>`).join('')}</ul>`:''}</div>`;
+  return h;
+}
+function vSummary(c){
+  const A=getA(c);let h=`<h2 class="pg">สรุปเวรและ OT ${MON[c.m]} ${c.y+543}</h2>`;
+  if(!A)return h+`<div class="card empty"><p>ยังไม่มีตารางเวร จัดตารางในขั้นที่ 1 ก่อน</p></div>`;
+  const R=summarize(c,A);
+  const td=(v,cls='')=>`<td class="${v?cls:'z'}">${v}</td>`;
+  const sp=a=>{const t=a[0]+a[1];return `<td class="${t?'':'z'}">${t}${a[1]?`<span class="sp">วันหยุด ${a[1]}</span>`:''}</td>`};
+  h+=`<p class="lead">ตัวเลขเล็กใต้แต่ละช่องคือจำนวนที่ตรงกับวันหยุด ใช้แยกอัตราค่าตอบแทนได้</p><div class="bar">${exportBtns()}</div>
+  <div class="scroll"><table class="sum"><thead><tr class="grp"><th colspan="4"></th><th colspan="4">เวร OT</th><th colspan="4">เวร Standby</th></tr>
+  <tr><th>พยาบาล</th><th>รวมทุกเวร</th><th>ดึกทั้งหมด</th><th>เวรปกติ/วันทำการ</th><th>เช้า</th><th>บ่าย</th><th>ดึก</th><th>รวม OT</th><th>เช้า</th><th>บ่าย</th><th>ดึก</th><th>รวม SB</th></tr></thead><tbody>`;
+  const T={total:0,nights:0,work:0,otT:0,sbT:0,ot:{M:0,A:0,N:0},sb:{M:0,A:0,N:0}};
+  R.forEach((o,i)=>{['total','nights','work','otT','sbT'].forEach(k=>T[k]+=o[k]);SH.forEach(s=>{T.ot[s]+=o.ot[s][0]+o.ot[s][1];T.sb[s]+=o.sb[s][0]+o.sb[s][1]});
+    const wl=o.n.mode==='fixed'?'เช้าวันทำการ':o.n.mode==='quota'?`โควตา ${o.n.quota}`:'';
+    h+=`<tr><td>${i+1}. ${esc(o.n.name)}<span class="sp">${esc(modeLabel(o.n))}</span></td>${td(o.total)}${td(o.nights)}<td class="${o.work?'':'z'}">${o.work}${wl?`<span class="sp">${wl}</span>`:''}</td>${sp(o.ot.M)}${sp(o.ot.A)}${sp(o.ot.N)}${td(o.otT,'b')}${sp(o.sb.M)}${sp(o.sb.A)}${sp(o.sb.N)}${td(o.sbT,'b')}</tr>`});
+  h+=`</tbody><tfoot><tr><td>รวม</td><td>${T.total}</td><td>${T.nights}</td><td>${T.work}</td><td>${T.ot.M}</td><td>${T.ot.A}</td><td>${T.ot.N}</td><td>${T.otT}</td><td>${T.sb.M}</td><td>${T.sb.A}</td><td>${T.sb.N}</td><td>${T.sbT}</td></tr></tfoot></table></div>
+  <div class="card" style="margin-top:16px"><h3>วิธีนับ</h3><p class="small">เช้าประจำ: เวรเช้าวันจันทร์–ศุกร์ที่ไม่ใช่วันหยุดนับเป็นวันทำการ เวรปกติอื่นทั้งหมดเป็น OT · รันเวร: ${S.rules.sbInQuota?'เวรปกติและ standby':'เวรปกติ'} ${S.rules.quotaOrder==='wdM'?'นับเวรเช้าวันธรรมดาเข้าโควตาก่อน แล้วจึงนับตามลำดับวันที่':'นับเข้าโควตาตามลำดับวันที่'} ส่วนที่เกินเป็น OT · OT ทั้งหมด: เวรปกติทุกเวรเป็น OT · Standby ${S.rules.sbInQuota?'ที่ไม่ได้นับเข้าโควตา':''} แยกนับในช่อง Standby (เปลี่ยนได้ในขั้นที่ 5)</p></div>`;
+  return h;
+}
+function vReq(c){
+  if(!S.nurses.find(n=>n.id===reqNurse))reqNurse=S.nurses[0]?.id;
+  const n=S.nurses.find(x=>x.id===reqNurse);
+  const cnt=id=>{const r=S.requests[c.mk]?.[id]||{};let w=0,o=0;Object.values(r).forEach(d=>SH.forEach(s=>{if(d[s]===1)w++;if(d[s]===2)o++}));return [w,o]};
+  let h=`<h2 class="pg">คำขอเวร ${MON[c.m]} ${c.y+543}</h2><p class="lead">เลือกชื่อ แล้วคลิกเวรเพื่อสลับ ว่าง → ขอไม่ขึ้น → ขอขึ้น คลิกเลขวันที่เพื่อขอไม่ขึ้นทั้งวัน "ขอไม่ขึ้น" ระบบจะไม่จัดให้แน่นอน "ขอขึ้น" ระบบจะจัดให้ก่อนถ้าไม่ขัดเงื่อนไขอื่น</p>
+  <div class="rq"><div class="nl">${S.nurses.map(x=>{const [w,o]=cnt(x.id);return `<button data-act="reqn" data-id="${x.id}" class="${x.id===reqNurse?'on':''}">${esc(x.name)}${w||o?`<span class="cnt">ขอขึ้น ${w} · ขอไม่ขึ้น ${o}</span>`:''}</button>`}).join('')}</div><div>`;
+  if(!n)return h+'</div></div>';
+  h+=`<div class="bar"><b>${esc(n.name)}</b><button class="btn ghost" data-act="reqclear">ล้างคำขอของคนนี้</button></div><div class="cal">${DOW.map((d,k)=>`<div class="wh ${k===0||k===6?'we':''}">${d}</div>`).join('')}`;
+  for(let k=0;k<c.days[0].dow;k++)h+='<div></div>';
+  c.days.forEach(day=>{h+=`<div class="cd ${day.hol?'hol':''}"><button class="cdn" data-act="reqday" data-d="${day.d}">${day.d}</button><div class="cb">${SH.map(s=>{const v=req(c,n.id,day.d,s);return `<button class="rb v${v}" data-act="reqs" data-d="${day.d}" data-s="${s}" title="${SHN[s]}: ${['ว่าง','ขอขึ้น','ขอไม่ขึ้น'][v]}">${SHC[s]}</button>`}).join('')}</div></div>`});
+  return h+`</div></div></div>`;
+}
+function vNurses(){
+  const NS=draft||S.nurses;
+  let h=`<h2 class="pg">พยาบาลและเงื่อนไข</h2><p class="lead">ปุ่มที่เปิดในตาราง คือเวรที่คนนั้นขึ้นได้ในแต่ละวันของสัปดาห์ "ปกติ" = เวรปกติ "SB" = standby ช่องจำนวนสูงสุดที่เว้นว่างไว้ หมายถึงไม่จำกัด</p>
+  <div class="bar"><button class="btn" data-act="addn">เพิ่มพยาบาล</button><button class="btn ghost" data-act="reset">คืนค่าเริ่มต้นทั้งหมด</button></div>`;
+  NS.forEach((n,i)=>{
+    h+=`<details class="nc" data-id="${n.id}" ${openCards.has(n.id)?'open':''}><summary><b>${i+1}. ${esc(n.name)}${n.nick?` (${esc(n.nick)})`:''}</b><span class="small muted">${esc(modeLabel(n))}${+n.maxReg?` · ปกติไม่เกิน ${n.maxReg}`:''}${+n.maxSb?` · SB ไม่เกิน ${n.maxSb}`:''}${+n.maxShifts?` · รวมไม่เกิน ${n.maxShifts}`:''}${+n.maxNight?` · ดึกไม่เกิน ${n.maxNight}`:''}</span></summary><div class="ncb">
+    <div class="f"><label>ชื่อ-สกุล<input class="w" data-f="name" data-id="${n.id}" value="${esc(n.name)}"></label>
+      <label>ชื่อเล่น (แสดงในมุมมองรายวัน)<input data-f="nick" data-id="${n.id}" value="${esc(n.nick)}"></label>
+      <label>วิธีนับเวร<select data-f="mode" data-id="${n.id}"><option value="quota" ${n.mode==='quota'?'selected':''}>รันเวร มีโควตาเวรปกติ</option><option value="fixed" ${n.mode==='fixed'?'selected':''}>เช้าวันธรรมดาประจำ + OT</option><option value="ot" ${n.mode==='ot'?'selected':''}>OT ทั้งหมด</option></select></label>
+      ${n.mode==='quota'?`<label>โควตาเวรปกติ<input type="number" min="0" data-f="quota" data-id="${n.id}" value="${n.quota}"></label>`:''}
+      <label>เวรปกติสูงสุด/เดือน${n.mode==='fixed'?' (ไม่รวมเช้าประจำ)':''}<input type="number" min="0" data-f="maxReg" data-id="${n.id}" value="${n.maxReg||''}" placeholder="ไม่จำกัด"></label>
+      <label>Standby สูงสุด/เดือน<input type="number" min="0" data-f="maxSb" data-id="${n.id}" value="${n.maxSb||''}" placeholder="ไม่จำกัด"></label>
+      <label>รวมทุกเวรสูงสุด/เดือน${n.mode==='fixed'?' (ไม่รวมเช้าประจำ)':''}<input type="number" min="0" data-f="maxShifts" data-id="${n.id}" value="${n.maxShifts||''}" placeholder="ไม่จำกัด"></label>
+      <label>เวรดึกสูงสุด/เดือน<input type="number" min="0" data-f="maxNight" data-id="${n.id}" value="${n.maxNight||''}" placeholder="ไม่จำกัด"></label></div>
+    <div class="scroll" style="display:inline-block;max-width:100%"><table class="al"><thead><tr><th>วัน</th>${SH.map(s=>`<th>${SHN[s]}</th>`).join('')}</tr></thead><tbody>${ROWS.map(r=>`<tr><th>${ROWN[r]}</th>${SH.map(s=>{const a=n.allow[r][s];return `<td><button class="tg ${a[0]?'on':''}" data-act="al" data-id="${n.id}" data-r="${r}" data-s="${s}" data-k="0">ปกติ</button><button class="tg sb ${a[1]?'on':''}" data-act="al" data-id="${n.id}" data-r="${r}" data-s="${s}" data-k="1">SB</button></td>`}).join('')}</tr>`).join('')}</tbody></table></div>
+    ${n.mode==='fixed'?'<p class="note">เวรเช้าวันจันทร์–ศุกร์ที่ไม่ใช่วันหยุดจะถูกใส่ให้อัตโนมัติ เว้นแต่ขอไม่ขึ้นหรือปิดปุ่ม "ปกติ" ของเช้าวันนั้น</p>':''}
+    <div class="row"><button class="btn ghost" data-act="up" data-id="${n.id}">เลื่อนขึ้น</button><button class="btn ghost" data-act="deln" data-id="${n.id}">ลบพยาบาลคนนี้</button></div></div></details>`;
+  });
+  h+=`<div class="savebar" id="nbar" ${draft?'':'hidden'}><b>มีการแก้ไขที่ยังไม่บันทึก</b><button class="btn" data-act="ncancel">ยกเลิกการแก้ไข</button><button class="btn pri" data-act="nsave">บันทึก</button></div>`;
+  return h;
+}
+function vStaff(c){
+  const st=S.staffing,r=S.rules;
+  const tbl=k=>`<table class="st"><thead><tr><th>เวร</th><th>ปกติ</th><th>Standby</th></tr></thead><tbody>${['M','A','N'].map(s=>`<tr><th>${SHN[s]}</th><td><input type="number" min="0" data-st="${k}.${s}.r" value="${st[k][s].r}"></td><td><input type="number" min="0" data-st="${k}.${s}.s" value="${st[k][s].s}"></td></tr>`).join('')}</tbody></table>`;
+  let h=`<h2 class="pg">อัตรากำลัง วันหยุด และกติกา</h2>${gasPanel()}<div class="cols"><div class="card"><h3>วันธรรมดา</h3>${tbl('wd')}</div><div class="card"><h3>วันหยุด</h3>${tbl('hol')}</div>
+  <div class="card"><h3>วันหยุด ${MON[c.m]} ${c.y+543}</h3><p class="note" style="margin:0 0 10px">คลิกเพื่อสลับวันหยุด/วันทำการ วันหยุดตามจันทรคติและวันหยุดชดเชยต้องเพิ่มเอง</p><div class="hc">${DOW.map(d=>`<div class="wh">${d}</div>`).join('')}${'<div></div>'.repeat(c.days[0].dow)}${c.days.map(d=>`<button class="${d.hol?'on':''}" data-act="hol" data-d="${d.d}">${d.d}</button>`).join('')}</div></div></div>
+  <div class="card"><h3>กติกาการจัดเวร</h3>
+   <div class="f"><label>เวรปกติติดกันได้สูงสุด<input type="number" min="1" data-rule="maxConsec" value="${r.maxConsec}"></label>
+   <label>ความละเอียดในการจัด<select data-rule="effort"><option value="1" ${+r.effort===1?'selected':''}>เร็ว</option><option value="2" ${+r.effort===2?'selected':''}>ปกติ</option><option value="3" ${+r.effort===3?'selected':''}>ละเอียด (ช้ากว่า)</option></select></label>
+   <label>นับโควตาเวรปกติของกลุ่มรันเวร<select data-rule="quotaOrder"><option value="date" ${r.quotaOrder==='date'?'selected':''}>ตามลำดับวันที่</option><option value="wdM" ${r.quotaOrder==='wdM'?'selected':''}>เช้าวันธรรมดาก่อน แล้วตามวันที่</option></select></label></div>
+   <label class="chk"><input type="checkbox" data-rule="forbidNMA" ${r.forbidNMA?'checked':''}><span>ห้ามจัด ดึก-เช้า-บ่าย ในวันเดียวกัน</span></label>
+   <label class="chk"><input type="checkbox" data-rule="fixedCount" ${r.fixedCount?'checked':''}><span>นับพยาบาลเช้าประจำรวมในอัตรากำลังเวรเช้า</span></label>
+   <label class="chk"><input type="checkbox" data-rule="sbInQuota" ${r.sbInQuota?'checked':''}><span>นับเวร standby รวมในโควตาของกลุ่มรันเวร</span></label>
+   <label class="chk"><input type="checkbox" data-rule="carry" ${r.carry?'checked':''}><span>ใช้เวร 2 วันสุดท้ายของเดือนก่อนในการตรวจเวรติดกัน (ถ้ามีตารางเดือนก่อนในโปรแกรม)</span></label>
+   <p class="note">เวร standby ไม่นับเป็นเวรติดกัน ถ้ามี standby คั่นระหว่างเวรปกติ ถือว่าไม่ติดกัน</p></div>
+  <div class="card"><h3>กลุ่มที่ห้ามอยู่เวรเดียวกัน</h3>`;
+  S.groups.forEach((g,gi)=>{h+=`<div class="grp"><div class="row">${S.nurses.map(n=>`<button class="tg ${g.members.includes(n.id)?'on':''}" data-act="gm" data-g="${gi}" data-id="${n.id}">${esc(shortName(n))}</button>`).join('')}</div>
+    <div class="row small">เวร ${SH.map(s=>`<button class="tg ${g.shifts.includes(s)?'on':''}" data-act="gs" data-g="${gi}" data-s="${s}">${SHN[s]}</button>`).join('')}<label class="chk" style="margin:0"><input type="checkbox" data-gsb="${gi}" ${g.sb?'checked':''}><span>รวม standby</span></label><button class="btn ghost" data-act="gdel" data-g="${gi}">ลบกลุ่ม</button></div></div>`});
+  return h+`<button class="btn" data-act="gadd">เพิ่มกลุ่ม</button></div>`;
+}
+function openCell(i,di){
+  const c=ctx(),n=S.nurses[i],day=c.days[di],A=getA(c);if(!A)return;
+  const V=validate(c,A),lk=(S.locks[c.mk]||{})[n.id]||{};
+  const msgs=SH.flatMap((s,si)=>V.cell[i+':'+(di*3+si)]||[]);
+  const rqs=SH.map(s=>{const v=req(c,n.id,day.d,s);return v?`${SHN[s]} ${v===1?'ขอขึ้น':'ขอไม่ขึ้น'}`:''}).filter(Boolean);
+  const isL=SH.some((s,si)=>(di*3+si) in lk);
+  document.getElementById('modal').innerHTML=`<div class="modal" data-act="mclose"><div class="mbox" role="dialog" aria-modal="true"><h3>${esc(n.name)}</h3><div class="small muted">วัน${DOWF[day.dow]}ที่ ${day.d} ${MON[c.m]}${day.hol?' (วันหยุด)':''}</div>
+  ${SH.map((s,si)=>{const v=A[i][di*3+si];return `<div class="srow"><b>${SHN[s]}</b><div class="seg">${['ว่าง','ปกติ','Standby'].map((l,k)=>`<button class="${v===k?'on':''}" data-act="setc" data-i="${i}" data-di="${di}" data-si="${si}" data-v="${k}">${l}</button>`).join('')}</div></div>`}).join('')}
+  ${rqs.length?`<p class="small">คำขอ: ${rqs.join(', ')}</p>`:''}${msgs.length?`<p class="small" style="color:var(--warn)">${[...new Set(msgs)].map(esc).join('<br>')}</p>`:''}
+  <div class="row" style="justify-content:space-between">${isL?`<button class="btn ghost" data-act="unlockday" data-i="${i}" data-di="${di}">ปลดล็อกวันนี้</button>`:'<span class="small muted">แก้แล้วจะล็อกวันนี้อัตโนมัติ</span>'}<button class="btn pri" data-act="mclose2">เสร็จ</button></div></div></div>`;
+}
+
+/* ================= export ================= */
+async function saveFile(filename,data,mime){
+  if(DL){try{await DL.save({filename,data});toast('บันทึกไฟล์แล้ว')}catch(e){toast(e&&e.code==='declined'?'ยกเลิกการบันทึก':'บันทึกไฟล์ไม่สำเร็จ'+(e&&e.message?': '+e.message:''))}return}
+  try{const b=data instanceof Blob?data:new Blob([data],{type:mime||'text/html'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+  catch(e){toast('เบราว์เซอร์นี้ไม่อนุญาตให้บันทึกไฟล์ ลองเปิดผ่านลิงก์ claude.ai')}
+}
+const cellText=(Ai,di)=>SH.map((s,si)=>{const v=Ai[di*3+si];return v===1?SHC[s]:v===2?SHC[s]+'(S)':''}).filter(Boolean).join(' ');
+function exportXlsx(){
+  if(!window.XLSX){toast('โหลดตัวสร้างไฟล์ Excel ไม่สำเร็จ ลองเปิดหน้าใหม่');return}
+  const c=ctx(),A=getA(c);if(!A){toast('ยังไม่มีตารางเวรเดือนนี้');return}
+  const V=validate(c,A),R=summarize(c,A),title=`ตารางเวรพยาบาล หอผู้ป่วยใน ประจำเดือน${MON[c.m]} ${c.y+543}`;
+  const wb=XLSX.utils.book_new();
+  const a1=[[title],[],['พยาบาล',...c.days.map(d=>d.d),'เวรปกติ/วันทำการ','OT','Standby','รวม'],['',...c.days.map(d=>DOW[d.dow]+(d.hol?'*':'')),'','','','']];
+  const LM=labMaps(c,A);
+  S.nurses.forEach((n,i)=>a1.push([`${i+1}. ${n.name}`,...c.days.map((d,di)=>SH.map((s,si)=>{const idx=di*3+si,v=A[i][idx];return v===1?SHC[s]+(LM[i][idx]==='OT'?'(OT)':''):v===2?SHC[s]+'(S)':''}).filter(Boolean).join(' ')),workLabel(R[i]),R[i].otT,R[i].sbT,R[i].total]));
+  a1.push([]);
+  ['M','A','N'].forEach(s=>{const si=SH.indexOf(s);
+    a1.push([`${SHN[s]} ปกติ มี/ต้องการ`,...c.days.map((d,di)=>{const v=V.cov[di*3+si];return `${v.r}/${v.nr}`})]);
+    a1.push([`${SHN[s]} standby มี/ต้องการ`,...c.days.map((d,di)=>{const v=V.cov[di*3+si];return v.ns?`${v.sb}/${v.ns}`:'-'})])});
+  a1.push([],['ด = ดึก  ช = เช้า  บ = บ่าย  (OT) = เวรปกติที่นับเป็น OT  (S) = standby  * = วันหยุด']);
+  const w1=XLSX.utils.aoa_to_sheet(a1);w1['!cols']=[{wch:26},...c.days.map(()=>({wch:8})),{wch:14},{wch:6},{wch:8},{wch:6}];
+  XLSX.utils.book_append_sheet(wb,w1,'ตารางเวรรายคน');
+  const a2=[[title],[],['วันที่','วัน','วันหยุด','เช้า','บ่าย','บ่าย standby','ดึก','ดึก standby','เช้า standby']];
+  const names=(idx,t)=>S.nurses.map((n,i)=>A[i][idx]===t?shortName(n):'').filter(Boolean).join(', ');
+  c.days.forEach((d,di)=>a2.push([d.d,DOWF[d.dow],d.hol?'หยุด':'',names(di*3+1,1),names(di*3+2,1),names(di*3+2,2),names(di*3,1),names(di*3,2),names(di*3+1,2)]));
+  const w2=XLSX.utils.aoa_to_sheet(a2);w2['!cols']=[{wch:6},{wch:10},{wch:7},{wch:34},{wch:22},{wch:14},{wch:22},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,w2,'ตารางเวรรายวัน');
+  const a3=[[`สรุปเวรและ OT ประจำเดือน${MON[c.m]} ${c.y+543}`],[],
+    ['ลำดับ','พยาบาล','วิธีนับ','รวมทุกเวร','ดึกทั้งหมด','เวรปกติ/วันทำการ',
+     'OT เช้า วันธรรมดา','OT เช้า วันหยุด','OT บ่าย วันธรรมดา','OT บ่าย วันหยุด','OT ดึก วันธรรมดา','OT ดึก วันหยุด','รวม OT',
+     'SB เช้า วันธรรมดา','SB เช้า วันหยุด','SB บ่าย วันธรรมดา','SB บ่าย วันหยุด','SB ดึก วันธรรมดา','SB ดึก วันหยุด','รวม SB']];
+  R.forEach((o,i)=>a3.push([i+1,o.n.name,modeLabel(o.n),o.total,o.nights,o.work,o.ot.M[0],o.ot.M[1],o.ot.A[0],o.ot.A[1],o.ot.N[0],o.ot.N[1],o.otT,o.sb.M[0],o.sb.M[1],o.sb.A[0],o.sb.A[1],o.sb.N[0],o.sb.N[1],o.sbT]));
+  const w3=XLSX.utils.aoa_to_sheet(a3);w3['!cols']=[{wch:6},{wch:24},{wch:30},...Array(17).fill({wch:10})];
+  XLSX.utils.book_append_sheet(wb,w3,'สรุป OT');
+  const a4=[['วันที่','วัน','วันหยุด','เวร','ประเภท','พยาบาล','การนับ']];const rows=[];
+  S.nurses.forEach((n,i)=>classify(c,A,i).forEach(x=>rows.push([x.di,SH.indexOf(x.s),[`${x.day.d}/${c.m+1}/${c.y+543}`,DOW[x.day.dow],x.hol?'หยุด':'',SHN[x.s],x.v===1?'ปกติ':'Standby',n.name,x.lab==='WORK'?'เวรปกติ/วันทำการ':x.lab==='OT'?'OT':'Standby']])));
+  rows.sort((p,q)=>p[0]-q[0]||p[1]-q[1]).forEach(r=>a4.push(r[2]));
+  const w4=XLSX.utils.aoa_to_sheet(a4);w4['!cols']=[{wch:12},{wch:5},{wch:7},{wch:6},{wch:9},{wch:24},{wch:16}];
+  XLSX.utils.book_append_sheet(wb,w4,'รายการเวร');
+  const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  saveFile(`ตารางเวร_IPD_${c.mk}.xlsx`,new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+}
+function exportPrint(){
+  const c=ctx(),A=getA(c);if(!A){toast('ยังไม่มีตารางเวรเดือนนี้');return}const R=summarize(c,A);
+  const col={N:'#3F3A8F',M:'#AD6800',A:'#0B7675'};
+  const LM=labMaps(c,A);const cell=(Ai,di,i)=>SH.map((s,si)=>{const v=Ai[di*3+si];return v===1?`<b style="color:${col[s]}${LM[i][di*3+si]==='OT'?';border:1.5px solid #111;padding:0 2px':''}">${SHC[s]}</b>`:v===2?`<span style="color:${col[s]};border:1px dashed ${col[s]};padding:0 2px">${SHC[s]}</span>`:''}).filter(Boolean).join('<br>');
+  const names=(idx,t)=>S.nurses.map((n,i)=>A[i][idx]===t?esc(shortName(n)):'').filter(Boolean).join(', ');
+  const h=`<!doctype html><html lang="th"><head><meta charset="utf-8"><title>ตารางเวร ${MON[c.m]} ${c.y+543}</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:"Sarabun","TH SarabunPSK","Noto Sans Thai",Tahoma,sans-serif;font-size:11px;color:#111}h1{font-size:16px;margin:0 0 6px}h2{font-size:13px;margin:14px 0 4px}table{border-collapse:collapse;width:100%;margin-bottom:10px}th,td{border:1px solid #999;padding:2px 3px;text-align:center}.n{text-align:left;white-space:nowrap}.h{background:#fbe3e4}.pb{page-break-before:always}.sg{margin-top:30px;display:flex;justify-content:space-around}</style></head><body>
+  <h1>ตารางเวรพยาบาล หอผู้ป่วยใน ประจำเดือน${MON[c.m]} ${c.y+543}</h1>
+  <table><tr><th class="n">พยาบาล</th>${c.days.map(d=>`<th class="${d.hol?'h':''}">${d.d}<br>${DOW[d.dow]}</th>`).join('')}<th>ปกติ</th><th>OT</th><th>SB</th><th>รวม</th></tr>
+  ${S.nurses.map((n,i)=>`<tr><td class="n">${i+1}. ${esc(n.name)}</td>${c.days.map((d,di)=>`<td class="${d.hol?'h':''}">${cell(A[i],di,i)}</td>`).join('')}<td>${workLabel(R[i])}</td><td><b>${R[i].otT}</b></td><td>${R[i].sbT}</td><td>${R[i].total}</td></tr>`).join('')}</table>
+  <div>ด = ดึก ช = เช้า บ = บ่าย ตัวในกรอบทึบ = เวรปกติที่นับเป็น OT ตัวในกรอบเส้นประ = standby ช่องสีชมพู = วันหยุด</div>
+  <div class="sg"><span>ผู้จัดตารางเวร ..............................</span><span>หัวหน้าหอผู้ป่วย ..............................</span><span>ผู้อนุมัติ ..............................</span></div>
+  <h2 class="pb">ตารางเวรรายวัน</h2><table><tr><th>วันที่</th><th>เช้า</th><th>บ่าย</th><th>ดึก</th><th>Standby</th></tr>
+  ${c.days.map((d,di)=>`<tr class="${d.hol?'h':''}"><td class="n">${DOW[d.dow]} ${d.d}</td><td class="n">${names(di*3+1,1)}</td><td class="n">${names(di*3+2,1)}</td><td class="n">${names(di*3,1)}</td><td class="n">${[['ช',di*3+1],['บ',di*3+2],['ด',di*3]].map(([l,ix])=>{const x=names(ix,2);return x?l+': '+x:''}).filter(Boolean).join(' / ')}</td></tr>`).join('')}</table>
+  <h2>สรุปเวรและ OT</h2><table><tr><th class="n">พยาบาล</th><th>รวม</th><th>ปกติ/ทำการ</th><th>OT ช</th><th>OT บ</th><th>OT ด</th><th>รวม OT</th><th>SB ช</th><th>SB บ</th><th>SB ด</th><th>รวม SB</th></tr>
+  ${R.map((o,i)=>`<tr><td class="n">${i+1}. ${esc(o.n.name)}</td><td>${o.total}</td><td>${o.work}</td>${['M','A','N'].map(s=>`<td>${o.ot[s][0]+o.ot[s][1]}</td>`).join('')}<td><b>${o.otT}</b></td>${['M','A','N'].map(s=>`<td>${o.sb[s][0]+o.sb[s][1]}</td>`).join('')}<td><b>${o.sbT}</b></td></tr>`).join('')}</table>
+  </body></html>`;
+  saveFile(`ตารางเวร_IPD_${c.mk}_พิมพ์.html`,h,'text/html');
+}
+
+/* ================= events ================= */
+const D=()=>draft||(draft=JSON.parse(JSON.stringify(S.nurses)));
+function setField(t){const n=D().find(x=>x.id===t.dataset.id),f=t.dataset.f;if(!n)return;n[f]=['quota','maxShifts','maxReg','maxSb','maxNight'].includes(f)?(+t.value||0):t.value}
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset&&t.dataset.f&&t.tagName==='INPUT'){setField(t);const b=document.getElementById('nbar');if(b)b.hidden=false}});
+async function saveNurses(){
+  if(!draft&&!(BK&&!dbRO)){toast('ไม่มีการแก้ไขที่ต้องบันทึก');return}
+  if(draft){const ids=new Set(draft.map(n=>n.id));
+  S.nurses=draft;draft=null;S.groups.forEach(g=>g.members=g.members.filter(id=>ids.has(id)));}
+  try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}
+  render();
+  if(BK&&!dbRO){clearTimeout(syncT);setSync('saving');const ok=await syncNow();toast(ok?'บันทึกแล้ว เปิดใหม่จะใช้ค่าล่าสุดนี้':'บันทึกในเครื่องนี้แล้ว แต่บันทึกขึ้นเซิร์ฟเวอร์ไม่สำเร็จ ลองกดบันทึกอีกครั้ง')}
+  else toast(dbRO?'โหมดดูอย่างเดียว บันทึกขึ้นเซิร์ฟเวอร์ไม่ได้':'บันทึกในเบราว์เซอร์เครื่องนี้แล้ว');
+}
+let pendingYes=null;
+function ask(msg,yes,fn){pendingYes=fn;document.getElementById('modal').innerHTML=`<div class="modal" data-act="mclose"><div class="mbox" role="alertdialog" aria-modal="true"><h3>${esc(msg)}</h3><div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn" data-act="mclose2">ยกเลิก</button><button class="btn danger" data-act="yes">${esc(yes)}</button></div></div></div>`}
+function lockDay(c,i,di,A){const L=S.locks[c.mk]=S.locks[c.mk]||{},nid=S.nurses[i].id,o=L[nid]=L[nid]||{};SH.forEach((s,si)=>o[di*3+si]=A[i][di*3+si])}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act,c=ctx();
+  if(a==='mclose'&&e.target!==t)return;
+  switch(a){
+    case 'page':page=t.dataset.k;window.scrollTo(0,0);break;
+    case 'view':view=t.dataset.v;break;
+    case 'mprev':S.month--;if(S.month<0){S.month=11;S.year--}save();break;
+    case 'mnext':S.month++;if(S.month>11){S.month=0;S.year++}save();break;
+    case 'gen':generate();return;
+    case 'clear':ask('ลบตารางเวรและการล็อกของเดือนนี้?','ลบตาราง',()=>{delete S.rosters[c.mk];delete S.locks[c.mk];save()});return;
+    case 'yes':{const f=pendingYes;pendingYes=null;document.getElementById('modal').innerHTML='';if(f)f();render();return}
+    case 'unlock':delete S.locks[c.mk];save();break;
+    case 'xlsx':exportXlsx();return;
+    case 'print':exportPrint();return;
+    case 'cell':openCell(+t.dataset.i,+t.dataset.di);return;
+    case 'setc':{const i=+t.dataset.i,di=+t.dataset.di,A=getA(c);A[i][di*3+ +t.dataset.si]=+t.dataset.v;setA(c,A);lockDay(c,i,di,A);save();render();openCell(i,di);return}
+    case 'unlockday':{const i=+t.dataset.i,di=+t.dataset.di,o=S.locks[c.mk]?.[S.nurses[i].id];if(o)SH.forEach((s,si)=>delete o[di*3+si]);save();render();openCell(i,di);return}
+    case 'mclose':case 'mclose2':document.getElementById('modal').innerHTML='';return;
+    case 'reqn':reqNurse=t.dataset.id;break;
+    case 'reqs':case 'reqday':{const R=S.requests[c.mk]=S.requests[c.mk]||{},P=R[reqNurse]=R[reqNurse]||{},d=t.dataset.d,D=P[d]=P[d]||{};
+      if(a==='reqs'){const s=t.dataset.s,v=D[s]||0;D[s]=v===0?2:v===2?1:0}else{const allOff=SH.every(s=>D[s]===2);SH.forEach(s=>D[s]=allOff?0:2)}
+      save();break}
+    case 'reqclear':if(S.requests[c.mk])delete S.requests[c.mk][reqNurse];save();break;
+    case 'al':{const n=D().find(x=>x.id===t.dataset.id),k=+t.dataset.k;n.allow[t.dataset.r][t.dataset.s][k]=!n.allow[t.dataset.r][t.dataset.s][k];break}
+    case 'addn':{const id='n'+Date.now().toString(36);D().push({id,name:'พยาบาลใหม่',nick:'',mode:'quota',quota:20,maxShifts:0,maxReg:0,maxSb:0,maxNight:0,allow:mkAllow(()=>[1,1])});openCards.add(id);break}
+    case 'deln':{const n=D().find(x=>x.id===t.dataset.id);ask(`ลบ ${n.name} ออกจากรายชื่อ? (มีผลเมื่อกดบันทึก)`,'ลบพยาบาล',()=>{draft=D().filter(x=>x.id!==n.id);openCards.delete(n.id)});return}
+    case 'ncancel':draft=null;toast('ยกเลิกการแก้ไขแล้ว');break;
+    case 'nsave':saveNurses();return;
+    case 'gasconn':gasConnect();return;
+    case 'gasoff':gasOff();return;
+    case 'backup':{const c2=ctx();saveFile(`สำรองข้อมูลจัดเวร_IPD_${c2.y+543}-${pad(c2.m+1)}.json`,JSON.stringify(S),'application/json');return}
+    case 'up':{const N=D(),i=N.findIndex(x=>x.id===t.dataset.id);if(i>0)[N[i-1],N[i]]=[N[i],N[i-1]];break}
+    case 'reset':ask('คืนค่าเริ่มต้นทั้งหมด? รายชื่อ เงื่อนไข คำขอ และตารางเวรทุกเดือนจะถูกลบ','คืนค่าเริ่มต้น',()=>{const old=[...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks)];draft=null;S=defaults();old.forEach(m=>dirty.add(m));save()});return;
+    case 'gm':{const g=S.groups[+t.dataset.g],id=t.dataset.id;g.members=g.members.includes(id)?g.members.filter(x=>x!==id):[...g.members,id];save();break}
+    case 'gs':{const g=S.groups[+t.dataset.g],s=t.dataset.s;g.shifts=g.shifts.includes(s)?g.shifts.filter(x=>x!==s):[...g.shifts,s];save();break}
+    case 'gdel':S.groups.splice(+t.dataset.g,1);save();break;
+    case 'gadd':S.groups.push({members:[],shifts:['A','N'],sb:true});save();break;
+    case 'hol':{const d=+t.dataset.d,k=`${c.y}-${pad(c.m+1)}-${pad(d)}`;S.holOverride[k]=!c.days[d-1].hol;save();break}
+    default:return;
+  }
+  render();
+});
+document.addEventListener('toggle',e=>{const d=e.target;if(d.matches&&d.matches('details.nc'))d.open?openCards.add(d.dataset.id):openCards.delete(d.dataset.id)},true);
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.f){setField(t);render();return}
+  if(t.dataset.st){const [k,s,x]=t.dataset.st.split('.');S.staffing[k][s][x]=Math.max(0,+t.value||0);save();render();return}
+  if(t.dataset.rule){const k=t.dataset.rule;S.rules[k]=t.type==='checkbox'?t.checked:(k==='quotaOrder'?t.value:(+t.value||0));save();render();return}
+  if(t.dataset.gsb!=null){S.groups[+t.dataset.gsb].sb=t.checked;save();render();return}
+});
+document.addEventListener('change',e=>{const t=e.target;if(t.id!=='restore'||!t.files||!t.files[0])return;
+  const f=t.files[0];t.value='';const rd=new FileReader();
+  rd.onload=()=>{let o;try{o=JSON.parse(rd.result)}catch(err){toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองข้อมูลของโปรแกรม');return}
+    if(!o||o.v!==3||!Array.isArray(o.nurses)){toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองข้อมูลของโปรแกรมฉบับนี้');return}
+    ask(`นำเข้าข้อมูลจาก ${f.name}? ข้อมูลปัจจุบันทั้งหมดจะถูกแทนที่`,'นำเข้า',()=>{
+      const old=[...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks)];
+      S=Object.assign(defaults(),o);draft=null;reqNurse=S.nurses[0]?.id;
+      [...old,...Object.keys(S.requests),...Object.keys(S.rosters),...Object.keys(S.locks)].forEach(m=>dirty.add(m));save();toast('นำเข้าข้อมูลแล้ว')})};
+  rd.readAsText(f)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('modal').innerHTML=''});
+render();
+</script>
+</body>
+</html>
